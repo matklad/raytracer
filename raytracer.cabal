@@ -1,0 +1,27 @@
+name:                tracer
+version:             0.1.0.0
+synopsis:            A ray tracer written in Haskell
+license:             MIT
+license-file:        LICENSE
+author:              Pavel Yakovlev <zhmactep@gmail.com>
+                   , Sergei Lebedev <superbobry@gmail.com>
+maintainer:          superbobry@gmail.com
+category:            Graphics
+build-type:          Simple
+cabal-version:       >= 1.12
+
+executable ray
+  hs-source-dirs:    bin
+  default-language:  Haskell2010
+  ghc-options:       -Wall -fno-warn-orphans -O2
+  main-is:           Ray.hs
+  build-depends:     base == 4.6.*
+                   , tracer
+
+library
+  hs-source-dirs:    src
+  default-language:  Haskell2010
+  ghc-options:       -Wall -fno-warn-orphans -O2
+  exposed-modules:   Graphics.Tracer
+
+  build-depends:     base == 4.6.*
