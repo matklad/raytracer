@@ -8,7 +8,7 @@
 
 module Data.Vec
     ( Vec(..)
-    , Normalized(..)
+    , Normalized
     , singleton
     , length
 
@@ -30,8 +30,7 @@ data Vec a = Vec { vecX :: !a
                  }
   deriving (Eq, Ord, Show)
 
-newtype Normalized a = Normalized { extract :: a }
-  deriving (Eq, Ord, Show, Functor, Foldable, Monoid, Num, Fractional)
+type Normalized a = a
 
 instance Functor Vec where
   fmap f (Vec { .. }) = Vec { vecX = f vecX, vecY = f vecY, vecZ = f vecZ }
@@ -82,7 +81,7 @@ f `scale` v = fmap (* f) v
 
 -- | Computes a unit vector, in the direction of @v@.
 normalize :: Floating a => Vec a -> Normalized (Vec a)
-normalize v = Normalized $! fmap (/ length v) v
+normalize v = fmap (/ length v) v
 {-# INLINEABLE normalize #-}
 {-# SPECIALIZE INLINE normalize :: Vec Double -> Normalized (Vec Double) #-}
 
