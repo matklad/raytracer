@@ -14,6 +14,5 @@ data Ray a = Ray { rayOrigin    :: !(Vec a)
     deriving (Eq, Show)
 
 along :: Num a => Ray a -> a -> Vec a
-along (Ray { .. }) d =
-  rayOrigin + extract rayDirection `Vec.scale` d
+along (Ray { .. }) d = rayOrigin + d `Vec.scale` extract rayDirection
 {-# SPECIALIZE INLINE along :: Ray Double -> Double -> Vec Double #-}

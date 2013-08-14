@@ -75,10 +75,10 @@ length v = sqrt $! dot v v
 {-# SPECIALIZE INLINE length :: Vec Double -> Double #-}
 
 -- | Scales a vector by a constant factor @f@.
-scale :: Num a =>Vec a -> a -> Vec a
-v `scale` f = fmap (* f) v
+scale :: Num a => a -> Vec a -> Vec a
+f `scale` v = fmap (* f) v
 {-# INLINEABLE scale #-}
-{-# SPECIALIZE INLINE scale :: Vec Double -> Double -> Vec Double #-}
+{-# SPECIALIZE INLINE scale :: Double -> Vec Double -> Vec Double #-}
 
 -- | Computes a unit vector, in the direction of @v@.
 normalize :: Floating a => Vec a -> Normalized (Vec a)
