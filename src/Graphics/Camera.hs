@@ -1,6 +1,5 @@
 module Graphics.Camera
-    ( Data2D(..)
-    , Size(..)
+    ( Size(..)
     , Resolution(..)
     , Orientation(..)
     , Camera(..)
@@ -18,24 +17,20 @@ module Graphics.Camera
 import Data.Vec (Vec(..), Normalized(..), normalize, scale, cross)
 import Data.Ray (Ray(..))
 
-data Data2D a = Data2D { dataX :: !a
-                       , dataY :: !a
-                       }
-    deriving (Eq, Show)
 
-type Size = Data2D Double
+type Size = (Double, Double)
 
-type Resolution = Data2D Int
+type Resolution = (Int, Int)
 
 -- up, right
-type Orientation = Data2D (Normalized (Vec Double))
+type Orientation = (Normalized (Vec Double), Normalized (Vec Double))
 
 data Camera = Camera { location          :: !(Vec Double)
-                     , direction         :: Normalized (Vec Double)
-                     , focus             :: Double
-                     , screenOrientation :: Orientation
-                     , screenSize        :: Size
-                     , screenResolution  :: Resolution
+                     , direction         :: !(Normalized (Vec Double))
+                     , focus             :: !Double
+                     , screenOrientation :: !Orientation
+                     , screenSize        :: !Size
+                     , screenResolution  :: !Resolution
                      }
   deriving (Eq, Show)
 
@@ -47,25 +42,25 @@ mkCamera loc lookAt up focus size res =
   where
     dir = normalize $ lookAt - loc
     nup = normalize up
-    orient = Data2D (normalize up) (normalize $ dir `cross` up)
+    orient = (normalize up, normalize $ dir `cross` up)
 
 sizeW :: Camera -> Double
-sizeW cam = dataX $ screenSize cam
+sizeW cam = fst $ screenSize cam
 
 sizeH :: Camera -> Double
-sizeH cam = dataY $ screenSize cam
+sizeH cam = snd $ screenSize cam
 
 resolutionW :: Camera -> Int
-resolutionW cam = dataX $ screenResolution cam
+resolutionW cam = fst $ screenResolution cam
 
 resolutionH :: Camera -> Int
-resolutionH cam = dataY $ screenResolution cam
+resolutionH cam = snd $ screenResolution cam
 
 screenUp :: Camera -> Normalized (Vec Double)
-screenUp cam = dataX $ screenOrientation cam
+screenUp cam = fst $ screenOrientation cam
 
 screenRight :: Camera -> Normalized (Vec Double)
-screenRight cam = dataY $ screenOrientation cam
+screenRight cam = snd $ screenOrientation cam
 
 applyCamera :: Camera -> Int -> Int -> Ray Double
 applyCamera cam x y = Ray origin (normalize dir)
@@ -74,7 +69,7 @@ applyCamera cam x y = Ray origin (normalize dir)
     mh = fromIntegral (resolutionH cam) / 2.0
     shiftUp = (fromIntegral y - mh) * (sizeH cam) / mh
     shiftRight = (fromIntegral x - mw) * (sizeW cam) / mw
-    dir = (focus cam) `scale` (direction cam) +
-          shiftUp `scale` (screenUp cam) +
-          shiftRight `scale` (screenRight cam)
-    origin = (location cam) + dir
+    dir = focus cam `scale` direction cam +
+          shiftUp `scale` screenUp cam +
+          shiftRight `scale` screenRight cam
+    origin = location cam + dir
