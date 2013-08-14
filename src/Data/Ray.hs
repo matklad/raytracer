@@ -7,10 +7,10 @@ module Data.Ray
 
 import Data.Vec (Vec(..), Normalized, scale)
 
-data Ray a = Ray { rayOrigin    :: !(Vec a)
-                 , rayDirection :: !(Normalized (Vec a))
-                 }
-    deriving (Eq, Show)
+data Ray a = Ray
+    { rayOrigin    :: !(Vec a)
+    , rayDirection :: !(Normalized (Vec a))
+    } deriving (Eq, Show)
 
 along :: Num a => Ray a -> a -> Vec a
 along (Ray { .. }) d = rayOrigin + d `scale` rayDirection
