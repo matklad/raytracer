@@ -1,3 +1,3 @@
 module Graphics.Tracer
-  (
-  ) where
+    (
+    ) where

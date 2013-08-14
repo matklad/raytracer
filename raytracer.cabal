@@ -22,9 +22,10 @@ library
   hs-source-dirs:    src
   default-language:  Haskell2010
   ghc-options:       -Wall -fno-warn-orphans -O2 -funbox-strict-fields
-  exposed-modules:   Graphics.Tracer
+  exposed-modules:   Graphics.Camera
+                   , Graphics.Tracer
 
-                    , Data.Vec
-                    , Data.Ray
+                   , Data.Vec
+                   , Data.Ray
 
   build-depends:     base == 4.6.*

@@ -7,16 +7,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Data.Vec
-  ( Vec(..)
-  , Normalized(..)
-  , singleton
-  , length
+    ( Vec(..)
+    , Normalized
+    , singleton
+    , length
 
-  , scale
-  , normalize
-  , dot
-  , cross
-  ) where
+    , scale
+    , normalize
+    , dot
+    , cross
+    ) where
 
 import Prelude hiding (sum, zipWith, length)
 
@@ -30,8 +30,7 @@ data Vec a = Vec { vecX :: !a
                  }
   deriving (Eq, Ord, Show)
 
-newtype Normalized a = Normalized a
-  deriving (Eq, Ord, Show, Functor, Foldable, Monoid, Num, Fractional)
+type Normalized a = a
 
 instance Functor Vec where
   fmap f (Vec { .. }) = Vec { vecX = f vecX, vecY = f vecY, vecZ = f vecZ }
@@ -75,14 +74,14 @@ length v = sqrt $! dot v v
 {-# SPECIALIZE INLINE length :: Vec Double -> Double #-}
 
 -- | Scales a vector by a constant factor @f@.
-scale :: Num a =>Vec a -> a -> Vec a
-v `scale` f = fmap (* f) v
+scale :: Num a => a -> Vec a -> Vec a
+f `scale` v = fmap (* f) v
 {-# INLINEABLE scale #-}
-{-# SPECIALIZE INLINE scale :: Vec Double -> Double -> Vec Double #-}
+{-# SPECIALIZE INLINE scale :: Double -> Vec Double -> Vec Double #-}
 
 -- | Computes a unit vector, in the direction of @v@.
 normalize :: Floating a => Vec a -> Normalized (Vec a)
-normalize v = Normalized $! fmap (/ length v) v
+normalize v = fmap (/ length v) v
 {-# INLINEABLE normalize #-}
 {-# SPECIALIZE INLINE normalize :: Vec Double -> Normalized (Vec Double) #-}
 
