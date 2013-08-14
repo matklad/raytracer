@@ -8,7 +8,7 @@ module Graphics.Camera
     , constructCamera
     ) where
 
-import Data.Vec (Vec(..), Normalized(..), cross, normalize)
+import Data.Vec (Vec(..), Normalized, cross, normalize)
 
 data PixelMatrix = PixelMatrix { pmX :: !Int, pmY :: !Int }
   deriving (Eq, Show)

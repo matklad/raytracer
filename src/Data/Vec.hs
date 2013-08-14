@@ -9,7 +9,6 @@
 module Data.Vec
     ( Vec(..)
     , Normalized
-    , singleton
     , length
 
     , scale
