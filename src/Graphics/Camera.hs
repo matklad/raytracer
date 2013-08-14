@@ -1,43 +1,34 @@
 module Graphics.Camera where
 
-import Data.Vec
+import Data.Vec (Vec, Normalized, normalize, cross)
 
-data ScreenSize = SSize { width  :: Double
-                        , height :: Double
-                        }
+data Data2D a = Data2D { dataX :: !a
+                       , dataY :: !a
+                       }
     deriving (Eq, Show)
 
-data PixelMatrix = PMat { x :: Int
-                        , y :: Int
-                        }
-    deriving (Eq, Show)
+type Size = Data2D Double
 
-data ScreenOrientation = SOrient { up   :: Normalized (Vec Double)
-                                 , left :: Normalized (Vec Double)
-                                 }
-    deriving (Eq, Show)
+type Resolution = Data2D Int
 
-data Screen = Screen ScreenSize PixelMatrix ScreenOrientation
-    deriving (Eq, Show)
+-- up, right
+type Orientation = Data2D (Normalized (Vec Double))
 
-data Camera = Camera { location  :: Vec Double
-                     , direction :: Normalized (Vec Double)
-                     , focus     :: Double
-                     , screen    :: Screen
+data Camera = Camera { location          :: Vec Double
+                     , direction         :: Normalized (Vec Double)
+                     , focus             :: Double
+                     , screenOrientation :: Orientation
+                     , screenSize        :: Size
+                     , screenResolution  :: Resolution
                      }
-    deriving (Eq, Show)
+  deriving (Eq, Show)
 
-
--- Location, LookAt, Up, Focus, Width, Height, x, y
-constructCamera :: Vec Double -> Vec Double -> Vec Double ->
-                   Double -> Double -> Double ->
-                   Int -> Int -> Camera
-constructCamera location lookAt up focus width height x y =
-    Camera location ndirection focus
-           (Screen (SSize width height) (PMat x y) (SOrient nup nright))
+-- location, lookAt, up, focus, size, resolution
+mkCamera :: Vec Double -> Vec Double -> Vec Double ->
+            Double -> Size -> Resolution -> Camera
+mkCamera loc lookAt up focus size res =
+    Camera loc dir focus orient size res
   where
-    direction = lookAt - location
-    right = direction `cross` up
-    ndirection = normalize direction
+    dir = normalize $ lookAt - loc
     nup = normalize up
-    nright = normalize right
+    orient = Data2D (normalize up) (normalize $ dir `cross` up)
