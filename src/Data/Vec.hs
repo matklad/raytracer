@@ -7,16 +7,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Data.Vec
-  ( Vec(..)
-  , Normalized(..)
-  , singleton
-  , length
+    ( Vec(..)
+    , Normalized(..)
+    , singleton
+    , length
 
-  , scale
-  , normalize
-  , dot
-  , cross
-  ) where
+    , scale
+    , normalize
+    , dot
+    , cross
+    ) where
 
 import Prelude hiding (sum, zipWith, length)
 
@@ -30,7 +30,7 @@ data Vec a = Vec { vecX :: !a
                  }
   deriving (Eq, Ord, Show)
 
-newtype Normalized a = Normalized a
+newtype Normalized a = Normalized { extract :: a }
   deriving (Eq, Ord, Show, Functor, Foldable, Monoid, Num, Fractional)
 
 instance Functor Vec where

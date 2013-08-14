@@ -1,41 +1,48 @@
-module Graphics.Camera where
+module Graphics.Camera
+    ( ScreenSize
+    , ScreenOrientation(..)
+    , PixelMatrix(..)
+    , Screen(..)
+    , Camera(..)
 
-import Data.Vec
+    , constructCamera
+    ) where
 
-data ScreenSize = SSize { width  :: Double
-                        , height :: Double
-                        }
-    deriving (Eq, Show)
+import Data.Vec (Vec(..), Normalized(..), cross, normalize)
 
-data PixelMatrix = PMat { x :: Int
-                        , y :: Int
-                        }
-    deriving (Eq, Show)
+data PixelMatrix = PixelMatrix { pmX :: !Int, pmY :: !Int }
+  deriving (Eq, Show)
 
-data ScreenOrientation = SOrient { up   :: Normalized (Vec Double)
-                                 , left :: Normalized (Vec Double)
-                                 }
-    deriving (Eq, Show)
+type ScreenSize = (Double, Double)
+data ScreenOrientation = ScreenOrientation
+    { soUp   :: !(Normalized (Vec Double))
+    , soLeft :: !(Normalized (Vec Double))
+    } deriving (Eq, Show)
 
-data Screen = Screen ScreenSize PixelMatrix ScreenOrientation
-    deriving (Eq, Show)
+data Screen = Screen
+    { screenSize        :: !ScreenSize
+    , screenPM          :: !PixelMatrix
+    , screenOrientation :: !ScreenOrientation
+    } deriving (Eq, Show)
 
-data Camera = Camera { location  :: Vec Double
-                     , direction :: Normalized (Vec Double)
-                     , focus     :: Double
-                     , screen    :: Screen
-                     }
-    deriving (Eq, Show)
-
+data Camera = Camera
+    { camLocation  :: !(Vec Double)
+    , camDirection :: !(Normalized (Vec Double))
+    , camFocus     :: !Double
+    , camScreen    :: !Screen
+    } deriving (Eq, Show)
 
 -- Location, LookAt, Up, Focus, Width, Height, x, y
 constructCamera :: Vec Double -> Vec Double -> Vec Double ->
                    Double -> Double -> Double ->
                    Int -> Int -> Camera
 constructCamera location lookAt up focus width height x y =
-    Camera location ndirection focus
-           (Screen (SSize width height) (PMat x y) (SOrient nup nright))
+    Camera location ndirection focus screen
   where
+    screen = Screen { screenSize = (width, height)
+                    , screenPM   = PixelMatrix x y
+                    , screenOrientation = ScreenOrientation nup nright
+                    }
     direction = lookAt - location
     right = direction `cross` up
     ndirection = normalize direction
