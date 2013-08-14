@@ -15,5 +15,5 @@ data Ray a = Ray { rayOrigin    :: !(Vec a)
 
 along :: Num a => Ray a -> a -> Vec a
 along (Ray { rayDirection = Normalized rayDirection, .. }) d =
-  rayOrigin + rayDirection * Vec.singleton d
+  rayOrigin + rayDirection `Vec.scale` d
 {-# SPECIALIZE INLINE along :: Ray Double -> Double -> Vec Double #-}
