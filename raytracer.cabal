@@ -24,4 +24,6 @@ library
   ghc-options:       -Wall -fno-warn-orphans -O2
   exposed-modules:   Graphics.Tracer
 
+                    , Data.Vec
+
   build-depends:     base == 4.6.*
