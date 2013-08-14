@@ -1,7 +1,7 @@
 module Graphics.Camera
-    ( Size(..)
-    , Resolution(..)
-    , Orientation(..)
+    ( Size
+    , Resolution
+    , Orientation
     , Camera(..)
     ,  mkCamera
 
@@ -14,7 +14,7 @@ module Graphics.Camera
     , applyCamera
     ) where
 
-import Data.Vec (Vec(..), Normalized(..), normalize, scale, cross)
+import Data.Vec (Vec(..), Normalized, normalize, scale, cross)
 import Data.Ray (Ray(..))
 
 
@@ -37,11 +37,10 @@ data Camera = Camera { location          :: !(Vec Double)
 -- location, lookAt, up, focus, size, resolution
 mkCamera :: Vec Double -> Vec Double -> Vec Double ->
             Double -> Size -> Resolution -> Camera
-mkCamera loc lookAt up focus size res =
-    Camera loc dir focus orient size res
+mkCamera loc lookAt up foc size res =
+    Camera loc dir foc orient size res
   where
     dir = normalize $ lookAt - loc
-    nup = normalize up
     orient = (normalize up, normalize $ dir `cross` up)
 
 sizeW :: Camera -> Double

@@ -15,7 +15,9 @@ executable ray
   default-language:  Haskell2010
   ghc-options:       -Wall -fno-warn-orphans -O2
   main-is:           Ray.hs
-  build-depends:     base == 4.6.*
+  build-depends:     base   == 4.6.*
+                   , OpenGL == 2.8.*
+                   , GLUT   == 2.4.*
                    , tracer
 
 library
