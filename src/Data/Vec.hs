@@ -12,6 +12,7 @@ module Data.Vec
   , singleton
   , length
 
+  , scale
   , normalize
   , dot
   , cross
@@ -63,7 +64,7 @@ instance Fractional a => Fractional (Vec a) where
 
 -- | Creates a vector with same value for all components.
 singleton :: a -> Vec a
-singleton !c = Vec { vecX = c, vecY = c, vecZ = c}
+singleton c = Vec { vecX = c, vecY = c, vecZ = c}
 {-# INLINEABLE singleton #-}
 {-# SPECIALIZE INLINE singleton :: Double -> Vec Double #-}
 
@@ -72,6 +73,12 @@ length :: (Floating a, Num a) => Vec a -> a
 length v = sqrt $! dot v v
 {-# INLINEABLE length #-}
 {-# SPECIALIZE INLINE length :: Vec Double -> Double #-}
+
+-- | Scales a vector by a constant factor @f@.
+scale :: Num a =>Vec a -> a -> Vec a
+v `scale` f = fmap (* f) v
+{-# INLINEABLE scale #-}
+{-# SPECIALIZE INLINE scale :: Vec Double -> Double -> Vec Double #-}
 
 -- | Computes a unit vector, in the direction of @v@.
 normalize :: Floating a => Vec a -> Normalized (Vec a)
