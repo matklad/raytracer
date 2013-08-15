@@ -8,7 +8,7 @@ module Data.Shape
     , Sphere(..)
     ) where
 
-import Data.Colour (Colour, green)
+import Data.Colour (Colour, green, blue)
 import Data.Material (Material)
 import Data.Vec (VecD, Normalized, dot, normalize)
 import Data.Ray (RayD, Ray(..))
@@ -54,3 +54,5 @@ instance Shape Sphere where
         t2 = (b + rd) / a
 
     normal (Sphere { .. }) x = normalize  (x - sphereCenter)
+
+    colour _ = blue
