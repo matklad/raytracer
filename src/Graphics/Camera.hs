@@ -1,16 +1,11 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Graphics.Camera
     ( Size
     , Resolution
     , Orientation
     , Camera(..)
-    ,  mkCamera
-
-    , sizeW
-    , sizeH
-    , resolutionW
-    , resolutionH
-    , screenUp
-    , screenRight
+    , mkCamera
     , applyCamera
     ) where
 
@@ -22,53 +17,43 @@ type Size = (Double, Double)
 
 type Resolution = (Int, Int)
 
--- up, right
-type Orientation = (Normalized (Vec Double), Normalized (Vec Double))
+type Orientation = ( Normalized (Vec Double)   -- ^ up
+                   , Normalized (Vec Double)   -- ^ right
+                   )
 
-data Camera = Camera { location          :: !(Vec Double)
-                     , direction         :: !(Normalized (Vec Double))
-                     , focus             :: !Double
-                     , screenOrientation :: !Orientation
-                     , screenSize        :: !Size
-                     , screenResolution  :: !Resolution
-                     }
-  deriving (Eq, Show)
+data Camera = Camera
+    { camLocation          :: !(Vec Double)
+    , camDirection         :: !(Normalized (Vec Double))
+    , camFocus             :: !Double
+    , camScreenOrientation :: !Orientation
+    , camScreenSize        :: !Size
+    , camScreenResolution  :: !Resolution
+    } deriving (Eq, Show)
 
--- location, lookAt, up, focus, size, resolution
-mkCamera :: Vec Double -> Vec Double -> Vec Double ->
-            Double -> Size -> Resolution -> Camera
-mkCamera loc lookAt up foc size res =
-    Camera loc dir foc orient size res
+mkCamera :: Vec Double  -- camera location
+         -> Vec Double  -- point on the screen
+         -> Vec Double  -- up
+         -> Double      -- distance to the screen
+         -> Size
+         -> Resolution
+         -> Camera
+mkCamera loc lookAt up focus size res =
+    Camera loc dir focus orient size res
   where
-    dir = normalize $ lookAt - loc
+    dir    = normalize $ lookAt - loc
     orient = (normalize up, normalize $ dir `cross` up)
 
-sizeW :: Camera -> Double
-sizeW cam = fst $ screenSize cam
-
-sizeH :: Camera -> Double
-sizeH cam = snd $ screenSize cam
-
-resolutionW :: Camera -> Int
-resolutionW cam = fst $ screenResolution cam
-
-resolutionH :: Camera -> Int
-resolutionH cam = snd $ screenResolution cam
-
-screenUp :: Camera -> Normalized (Vec Double)
-screenUp cam = fst $ screenOrientation cam
-
-screenRight :: Camera -> Normalized (Vec Double)
-screenRight cam = snd $ screenOrientation cam
-
 applyCamera :: Camera -> Int -> Int -> Ray Double
-applyCamera cam x y = Ray origin (normalize dir)
+applyCamera (Camera { .. }) x y = Ray { .. }
   where
-    mw = fromIntegral (resolutionW cam) / 2.0
-    mh = fromIntegral (resolutionH cam) / 2.0
-    shiftUp = (fromIntegral y - mh) * (sizeH cam) / mh
-    shiftRight = (fromIntegral x - mw) * (sizeW cam) / mw
-    dir = focus cam `scale` direction cam +
-          shiftUp `scale` screenUp cam +
-          shiftRight `scale` screenRight cam
-    origin = location cam + dir
+    (resolutionW, resolutionH) = camScreenResolution
+    (sizeW, sizeH) = camScreenSize
+    (screenUp, screenRight) = camScreenOrientation
+    mw = fromIntegral resolutionW / 2.0
+    mh = fromIntegral resolutionH / 2.0
+    shiftUp    = (fromIntegral y - mh) * sizeH  / mh
+    shiftRight = (fromIntegral x - mw) * sizeW / mw
+    rayOrigin    = camLocation + rayDirection
+    rayDirection = normalize $ (camFocus `scale` camDirection +
+                                shiftUp `scale` screenUp +
+                                shiftRight `scale` screenRight)
