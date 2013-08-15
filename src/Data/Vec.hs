@@ -5,6 +5,7 @@
 
 module Data.Vec
     ( Vec(..)
+    , VecD
     , Normalized
     , length
 
@@ -26,7 +27,10 @@ data Vec a = Vec { vecX :: !a
                  }
   deriving (Eq, Ord, Show)
 
+type VecD = Vec Double
+
 type Normalized a = a
+
 
 instance Functor Vec where
   fmap f (Vec { .. }) = Vec { vecX = f vecX, vecY = f vecY, vecZ = f vecZ }
