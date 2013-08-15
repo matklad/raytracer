@@ -34,7 +34,7 @@ data Sphere = Sphere
     } deriving Show
 
 instance Shape Sphere where
-  intersect (Sphere { .. }) ray@(Ray { .. }) =
+  intersect (Sphere { .. }) (Ray { .. }) =
      -- sphere equation:: (center - x)^2 == a^2
      -- ray equation::    (origin + t*d)
      -- combined and simplified:
