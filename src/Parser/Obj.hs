@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Parser.Obj
-       ( parse
-       ) where
+    ( parse
+    ) where
 
-import Data.Maybe(catMaybes)
+import Data.Maybe (catMaybes)
 
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Array as A
-import Data.ByteString.Lex.Double(readDouble)
+import Data.ByteString.Lex.Double (readDouble)
 
 type Point = (Double, Double, Double)
 
@@ -17,10 +17,9 @@ parse s =
     faces
   where
     ls = B.lines s
-    startsWith pref str = (B.take (B.length pref) str) == pref
-
-    vLines = filter (startsWith "v ") ls
-    fLines = filter (startsWith "f ") ls
+    
+    vLines = filter (B.isPrefixOf "v ") ls
+    fLines = filter (B.isPrefixOf "f ") ls
 
     verts = A.array (0, length vLines) (zip [0..] $ map readVert vLines)
     faces = map readFace fLines
