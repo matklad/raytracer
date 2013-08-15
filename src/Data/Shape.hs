@@ -1,5 +1,5 @@
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Data.Shape
     ( Shape(..)
@@ -13,7 +13,6 @@ import Data.Material (Material)
 import Data.Vec (Vec(..), Normalized, dot)
 import Data.Ray (Ray(..))
 
-
 class Shape a where
   intersect :: a -> Ray Double -> Maybe Double
   normal    :: a -> Vec Double -> Normalized (Vec Double)
@@ -21,7 +20,7 @@ class Shape a where
   colour :: a -> Colour
   colour = undefined
 
-  material  :: a -> Material
+  material :: a -> Material
   material = undefined
 
 data SomeShape = forall a. Shape a => SomeShape a
@@ -42,7 +41,7 @@ instance Shape Sphere where
      -- at^2 + 2bt + c == 0
      if d < 0
      then Nothing
-     else case filter (> 0) [t1, t2] of
+     else filter (> 0) [t1, t2] of
          [] -> Nothing
          xs -> Just $! minimum xs
    where
