@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Parser.Obj
+module Text.Obj
     ( parse
     ) where
 
@@ -17,7 +17,7 @@ parse s =
     faces
   where
     ls = B.lines s
-    
+
     vLines = filter (B.isPrefixOf "v ") ls
     fLines = filter (B.isPrefixOf "f ") ls
 

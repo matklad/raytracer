@@ -26,13 +26,15 @@ library
   ghc-options:       -Wall -fno-warn-orphans -O2 -funbox-strict-fields
   exposed-modules:   Graphics.Camera
                    , Graphics.Tracer
-                   , Parser.Obj
+                   , Text.Obj
+                   , Text.Mtl
 
                    , Data.Vec
                    , Data.Ray
                    , Data.Shape
 
-  build-depends:     base == 4.6.*
+  build-depends:     base              == 4.6.*
                    , bytestring-lexing == 0.4.*
-                   , bytestring == 0.10.*
-                   , array == 0.4.*
+                   , bytestring        == 0.10.*
+                   , array             == 0.4.*
+                   , attoparsec        == 0.10.4.*
