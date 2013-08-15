@@ -17,7 +17,7 @@ class Shape a where
   intersect :: a -> RayD -> Maybe Double
   normal    :: a -> VecD -> Normalized VecD
   colour :: a -> Colour
-  colour _ = green
+  colour = const green
 
   material :: a -> Material
   material = undefined
@@ -27,7 +27,7 @@ data SomeShape = forall a. Shape a => SomeShape a
 -- * Shapes
 
 data Sphere = Sphere
-    { sphereCenter :: !(VecD)
+    { sphereCenter :: !VecD
     , sphereRadius :: !Double
     } deriving Show
 
@@ -55,4 +55,4 @@ instance Shape Sphere where
 
     normal (Sphere { .. }) x = normalize  (x - sphereCenter)
 
-    colour _ = blue
+    colour = const blue
