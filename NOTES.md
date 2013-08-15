@@ -50,9 +50,9 @@ Roadmap:
 trace  :: Ray -> [SomeShape] -> Maybe (SomeShape, Vec Double)
 shade  :: Ray -> (SomeShape, Vec Double) -> Colour
 
-render :: Scene -> (Double, Double) -> Colour
+render :: Scene -> (Int, Int) -> Colour
 render =
-  let ray = converts (Double, Double) -> Ray in
+  let ray = applyCamera (Int, Int) ... in
   case trace ray shapes of
     Just ... -> shade ray ...
     Nothing  -> defaultColour
