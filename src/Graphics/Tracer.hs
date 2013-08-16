@@ -11,7 +11,7 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
-import Data.Colour (Colour, green)
+import Data.Colour (Colour)
 import Data.Ray (Ray, applyRay)
 import Data.Vec (Vec)
 import Graphics.Shape (Shape(..), SomeShape)
@@ -29,5 +29,5 @@ trace ray shapes = case candidates of
 {-# INLINEABLE trace #-}
 
 shade :: Ray -> (SomeShape, Vec) -> Colour
-shade _ray (_shape, _v) = green
+shade _ray (shape, v) = shape `colourAt` v
 {-# INLINABLE shade #-}
