@@ -2,19 +2,19 @@ module Data.Vec
     ( Vec
     , vec
 
-    , I.Normalized
+    , Internal.Normalized
 
-    , I.length
-    , I.scale
-    , I.normalize
-    , I.dot
-    , I.cross
+    , Internal.length
+    , Internal.scale
+    , Internal.normalize
+    , Internal.dot
+    , Internal.cross
     ) where
 
-import qualified Data.Vec.Internal as I
+import qualified Data.Vec.Internal as Internal
 
-type Vec = I.Vec Double
+type Vec = Internal.Vec Double
 
 vec :: Double -> Double -> Double -> Vec
-vec = I.Vec
+vec = Internal.Vec
 {-# INLINE vec #-}
