@@ -5,37 +5,46 @@ module Graphics.Shape
     ( Shape(..)
     , SomeShape(..)
 
+    , Texture(..)
+
     , Sphere(..)
     ) where
 
 import Data.Colour (Colour)
-import Data.Material (Material)
 import Data.Vec (Vec, Normalized, dot, normalize)
 import Data.Ray (Ray(..))
 
-class Shape a where
-  intersect :: a -> Ray -> Maybe Double
-  normalAt  :: a -> Vec -> Normalized Vec
-  colourAt  :: a -> Vec -> Colour
 
-  material  :: a -> Material
-  material = undefined
+data Texture = Solid Colour
+             | Procedure (Vec -> Colour)
+             | Bitmap
+
+class Shape a where
+    intersect :: a -> Ray -> Maybe Double
+    normalAt  :: a -> Vec -> Normalized Vec
+    texture   :: a -> Texture
+
+    colourAt :: a -> Vec -> Colour
+    colourAt = go . texture where
+      go (Solid c)     = const c
+      go (Procedure f) = f
+      go _t            = undefined
+    {-# INLINE colourAt #-}
 
 data SomeShape = forall a. Shape a => SomeShape a
 
 instance Shape SomeShape where
-  intersect (SomeShape shape) = intersect shape
-  normalAt (SomeShape shape)  = normalAt shape
-  colourAt (SomeShape shape)  = colourAt shape
-  material (SomeShape shape)  = material shape
+    intersect (SomeShape shape) = intersect shape
+    normalAt (SomeShape shape)  = normalAt shape
+    texture (SomeShape shape)   = texture shape
 
 -- * Shapes
 
 data Sphere = Sphere
-    { sphereCenter :: !Vec
-    , sphereRadius :: !Double
-    , sphereColour :: Colour
-    } deriving Show
+    { sphereCenter  :: !Vec
+    , sphereRadius  :: !Double
+    , sphereTexture :: Texture
+    }
 
 instance Shape Sphere where
     intersect (Sphere { .. }) (Ray { .. }) =
@@ -47,8 +56,8 @@ instance Shape Sphere where
         if d < 0
         then Nothing
         else case filter (> 0) [t1, t2] of
-         [] -> Nothing
-         xs -> Just $! minimum xs
+            [] -> Nothing
+            xs -> Just $! minimum xs
       where
         co = sphereCenter - rayOrigin
         a  = rayDirection `dot` rayDirection
@@ -60,4 +69,4 @@ instance Shape Sphere where
         t2 = (b + rd) / a
 
     normalAt (Sphere { .. }) x = normalize (x - sphereCenter)
-    colourAt = const . sphereColour
+    texture = sphereTexture

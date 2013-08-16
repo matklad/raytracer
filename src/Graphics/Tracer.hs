@@ -17,7 +17,7 @@ import Data.Ray (Ray, applyRay)
 import Data.Vec (Vec)
 import Graphics.Camera (applyCamera)
 import Graphics.Scene (Scene(..))
-import Graphics.Shape (Shape(..), SomeShape)
+import Graphics.Shape (Shape(..), SomeShape, colourAt)
 
 trace :: Ray -> [SomeShape] -> Maybe (SomeShape, Vec)
 trace ray shapes = case candidates of
