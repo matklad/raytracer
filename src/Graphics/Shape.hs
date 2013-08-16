@@ -8,7 +8,7 @@ module Graphics.Shape
     , Sphere(..)
     ) where
 
-import Data.Colour (Colour, blue)
+import Data.Colour (Colour)
 import Data.Material (Material)
 import Data.Vec (Vec, Normalized, dot, normalize)
 import Data.Ray (Ray(..))
@@ -34,6 +34,7 @@ instance Shape SomeShape where
 data Sphere = Sphere
     { sphereCenter :: !Vec
     , sphereRadius :: !Double
+    , sphereColour :: Colour
     } deriving Show
 
 instance Shape Sphere where
@@ -59,5 +60,4 @@ instance Shape Sphere where
         t2 = (b + rd) / a
 
     normalAt (Sphere { .. }) x = normalize (x - sphereCenter)
-
-    colourAt _shpere = const blue
+    colourAt = const . sphereColour
