@@ -30,10 +30,10 @@ data Camera = Camera
     , camScreenResolution  :: !Resolution
     } deriving (Eq, Show)
 
-mkCamera :: Vec  -- camera location
-         -> Vec  -- point on the screen
-         -> Vec  -- up
-         -> Double      -- distance to the screen
+mkCamera :: Vec    -- ^ camera location
+         -> Vec    -- ^ point on the screen
+         -> Vec    -- ^ up
+         -> Double -- ^ distance to the screen
          -> Size
          -> Resolution
          -> Camera
