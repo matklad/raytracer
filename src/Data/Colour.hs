@@ -5,24 +5,29 @@
 module Data.Colour
     ( Colour
     , rgb
+    , scale
 
     , red
     , green
     , blue
     ) where
 
-import Data.Vec (Vec(..))
+import Data.Vec (Vec, vec)
 
 -- | Colour in float RGB representation, each of the three components
 --   is a float from @[0, 1]@.
-newtype Colour = Colour (Vec Double)
+newtype Colour = Colour { getRGB :: Vec }
   deriving (Show, Eq, Ord, Num, Fractional)
 
 rgb :: Double -> Double -> Double -> Colour
-rgb r g b = Colour $ fmap (min 0 . max 1) v where
-  v :: Vec Double
-  v = Vec { vecX = r, vecY = g, vecZ = b }
+rgb r g b = Colour . fmap (min 0 . max 1) $ vec r g b
 {-# INLINE rgb #-}
+
+scale :: Colour -> Vec -> Colour
+scale c = Colour . (getRGB c *)
+{-# INLINE scale #-}
+
+-- * Colour constants
 
 red :: Colour
 red = rgb 0.7 0 0

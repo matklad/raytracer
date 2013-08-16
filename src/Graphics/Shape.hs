@@ -1,33 +1,38 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Data.Shape
+module Graphics.Shape
     ( Shape(..)
     , SomeShape(..)
 
     , Sphere(..)
     ) where
 
-import Data.Colour (Colour, green, blue)
+import Data.Colour (Colour, blue)
 import Data.Material (Material)
-import Data.Vec (VecD, Normalized, dot, normalize)
-import Data.Ray (RayD, Ray(..))
+import Data.Vec (Vec, Normalized, dot, normalize)
+import Data.Ray (Ray(..))
 
 class Shape a where
-  intersect :: a -> RayD -> Maybe Double
-  normal    :: a -> VecD -> Normalized VecD
-  colour :: a -> Colour
-  colour = const green
+  intersect :: a -> Ray -> Maybe Double
+  normalAt  :: a -> Vec -> Normalized Vec
+  colourAt  :: a -> Vec -> Colour
 
-  material :: a -> Material
+  material  :: a -> Material
   material = undefined
 
 data SomeShape = forall a. Shape a => SomeShape a
 
+instance Shape SomeShape where
+  intersect (SomeShape shape) = intersect shape
+  normalAt (SomeShape shape)  = normalAt shape
+  colourAt (SomeShape shape)  = colourAt shape
+  material (SomeShape shape)  = material shape
+
 -- * Shapes
 
 data Sphere = Sphere
-    { sphereCenter :: !VecD
+    { sphereCenter :: !Vec
     , sphereRadius :: !Double
     } deriving Show
 
@@ -53,6 +58,6 @@ instance Shape Sphere where
         t1 = (b - rd) / a
         t2 = (b + rd) / a
 
-    normal (Sphere { .. }) x = normalize  (x - sphereCenter)
+    normalAt (Sphere { .. }) x = normalize (x - sphereCenter)
 
-    colour = const blue
+    colourAt _shpere = const blue

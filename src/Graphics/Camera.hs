@@ -9,7 +9,7 @@ module Graphics.Camera
     , applyCamera
     ) where
 
-import Data.Vec (Vec(..), Normalized, normalize, scale, cross)
+import Data.Vec (Vec, Normalized, normalize, scale, cross)
 import Data.Ray (Ray(..))
 
 
@@ -17,22 +17,22 @@ type Size = (Double, Double)
 
 type Resolution = (Int, Int)
 
-type Orientation = ( Normalized (Vec Double)   -- ^ up
-                   , Normalized (Vec Double)   -- ^ right
+type Orientation = ( Normalized Vec   -- ^ up
+                   , Normalized Vec   -- ^ right
                    )
 
 data Camera = Camera
-    { camLocation          :: !(Vec Double)
-    , camDirection         :: !(Normalized (Vec Double))
+    { camLocation          :: !Vec
+    , camDirection         :: !(Normalized Vec)
     , camFocus             :: !Double
     , camScreenOrientation :: !Orientation
     , camScreenSize        :: !Size
     , camScreenResolution  :: !Resolution
     } deriving (Eq, Show)
 
-mkCamera :: Vec Double  -- camera location
-         -> Vec Double  -- point on the screen
-         -> Vec Double  -- up
+mkCamera :: Vec  -- camera location
+         -> Vec  -- point on the screen
+         -> Vec  -- up
          -> Double      -- distance to the screen
          -> Size
          -> Resolution
@@ -43,7 +43,7 @@ mkCamera loc lookAt up focus size res =
     dir    = normalize $ lookAt - loc
     orient = (normalize up, normalize $ dir `cross` up)
 
-applyCamera :: Camera -> Int -> Int -> Ray Double
+applyCamera :: Camera -> Int -> Int -> Ray
 applyCamera (Camera { .. }) x y = Ray { .. }
   where
     (resolutionW, resolutionH) = camScreenResolution

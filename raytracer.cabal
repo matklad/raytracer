@@ -25,13 +25,14 @@ library
   default-language:  Haskell2010
   ghc-options:       -Wall -fno-warn-orphans -O2 -funbox-strict-fields
   exposed-modules:   Graphics.Camera
+                   , Graphics.Scene
+                   , Graphics.Shape
                    , Graphics.Tracer
                    , Text.Obj
                    , Text.Mtl
 
                    , Data.Vec
                    , Data.Ray
-                   , Data.Shape
 
   build-depends:     base              == 4.6.*
                    , bytestring-lexing == 0.4.*
