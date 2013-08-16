@@ -8,11 +8,14 @@ module Graphics.Shape
     , Texture(..)
 
     , Sphere(..)
+    , triangle
     ) where
 
 import Data.Colour (Colour)
-import Data.Vec (Vec, Normalized, dot, normalize)
+import Data.Vec (Vec, Normalized, dot, normalize, scale, cross)
 import Data.Ray (Ray(..))
+
+
 
 data Texture = Solid Colour
              | Procedure (Vec -> Colour)
@@ -47,10 +50,10 @@ data Sphere = Sphere
 
 instance Shape Sphere where
     intersect (Sphere { .. }) (Ray { .. }) =
-        -- sphere equation:: (center - x)^2 == a^2
-        -- ray equation::    (origin + t*d)
+        -- sphere equation:: (C - X)^2 == r^2
+        -- ray equation::    (O + t*D)
         -- combined and simplified:
-        -- t^2 * d^2 -2t * d(center-origin) + (center-origin)^2 - a^2== 0
+        -- t^2 * D^2 -2t * D(C-O) + (C-O)^2 - r^2== 0
         -- at^2 + 2bt + c == 0
         if d < 0
         then Nothing
@@ -69,3 +72,60 @@ instance Shape Sphere where
 
     normalAt (Sphere { .. }) x = normalize (x - sphereCenter)
     texture = sphereTexture
+
+
+data Triangle = Triangle
+    { triangleA :: !Vec
+    , triangleB :: !Vec
+    , triangleC :: !Vec
+    , triangleTexture :: Texture
+      -- microoptimization: precomputed constants
+    , triangleAB   :: !Vec
+    , triangleAC   :: !Vec
+    , triangleN    :: !Vec
+    , triangleABxN :: !Vec
+    , triangleACxN :: !Vec
+    , triangleABdACxN :: !Double
+    , triangleACdABxN :: !Double
+    }
+
+triangle :: Texture -> Vec -> Vec -> Vec -> Triangle
+triangle triangleTexture triangleA triangleB triangleC =
+    Triangle { .. }
+  where
+    triangleAB = triangleB - triangleA
+    triangleAC = triangleC - triangleA
+    triangleN  = normalize $ triangleAB `cross` triangleAC
+    triangleABxN = triangleAB `cross` triangleN
+    triangleACxN = triangleAC `cross` triangleN
+    triangleABdACxN = triangleAB `dot` triangleACxN
+    triangleACdABxN = triangleAC `dot` triangleABxN
+
+instance Shape Triangle where
+    intersect (Triangle { .. }) (Ray { .. }) =
+        --     B     N = AB x AC
+        --   -/ \
+        --   /   -
+        --  /     \
+        -- A------>C
+        --     q
+        -- triangle equation:: pAB + qAC + A , 0<=p, q, p+q<=1
+        -- ray equation     :: O + t*D
+        -- t*D = pAB + qAC + A - O   -- `dot` N
+        -- t = (A - O)*N / DN
+        -- p = (t*D - (A - O)) * ACxN / (AB*ACxN)
+        -- q = (t*D - (A - O)) * ABxN / (AC*ABxN)
+        if t > 0 && (0 <= p && p <= 1) && (0 <= q && q <= 1) && (p + q <= 1)
+        then Just t
+        else Nothing
+      where
+        ao = triangleA - rayOrigin
+        t = (ao `dot` triangleN) / (rayDirection `dot` triangleN)
+        tdo = scale t rayDirection - ao
+        p = (tdo `dot` triangleACxN) / triangleABdACxN
+        q = (tdo `dot` triangleABxN) / triangleACdABxN
+
+
+    normalAt t _ = triangleN t
+
+    texture = triangleTexture
