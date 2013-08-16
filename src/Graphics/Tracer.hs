@@ -22,9 +22,8 @@ import Graphics.Shape (Shape(..), SomeShape, colourAt)
 trace :: Ray -> [SomeShape] -> Maybe (SomeShape, Vec)
 trace ray shapes = case candidates of
     [] -> Nothing
-    _  ->
-      let (shape, d) = minimumBy (compare `on` snd) candidates
-      in Just (shape, applyRay ray d)
+    _  -> case minimumBy (compare `on` snd) candidates of
+        (shape, d) -> Just (shape, applyRay ray d)
   where
     candidates :: [(SomeShape, Double)]
     candidates =

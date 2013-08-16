@@ -14,7 +14,6 @@ import Data.Colour (Colour)
 import Data.Vec (Vec, Normalized, dot, normalize)
 import Data.Ray (Ray(..))
 
-
 data Texture = Solid Colour
              | Procedure (Vec -> Colour)
              | Bitmap
