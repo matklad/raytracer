@@ -43,8 +43,8 @@ mkCamera loc lookAt up focus size res =
     dir    = normalize $ lookAt - loc
     orient = (normalize up, normalize $ dir `cross` up)
 
-applyCamera :: Camera -> Int -> Int -> Ray
-applyCamera (Camera { .. }) x y = Ray { .. }
+applyCamera :: Camera -> (Int, Int) -> Ray
+applyCamera (Camera { .. }) (x, y) = Ray { .. }
   where
     (resolutionW, resolutionH) = camScreenResolution
     (sizeW, sizeH) = camScreenSize

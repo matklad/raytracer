@@ -1,5 +1,11 @@
 module Graphics.Scene
-    ( Scene
+    ( Scene(..)
     ) where
 
-data Scene
+import Graphics.Camera (Camera)
+import Graphics.Shape (SomeShape)
+
+data Scene = Scene
+    { sceneCamera :: !Camera
+    , sceneShapes :: ![SomeShape]
+    }

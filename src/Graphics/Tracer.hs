@@ -1,9 +1,10 @@
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Graphics.Tracer
     ( trace
     , shade
+    , render
     ) where
 
 import Control.Applicative ((<$>))
@@ -14,6 +15,8 @@ import Data.Maybe (mapMaybe)
 import Data.Colour (Colour)
 import Data.Ray (Ray, applyRay)
 import Data.Vec (Vec)
+import Graphics.Camera (applyCamera)
+import Graphics.Scene (Scene(..))
 import Graphics.Shape (Shape(..), SomeShape)
 
 trace :: Ray -> [SomeShape] -> Maybe (SomeShape, Vec)
@@ -31,3 +34,9 @@ trace ray shapes = case candidates of
 shade :: Ray -> (SomeShape, Vec) -> Colour
 shade _ray (shape, v) = shape `colourAt` v
 {-# INLINABLE shade #-}
+
+render :: Scene -> (Int, Int) -> Maybe Colour
+render (Scene { .. }) p = shade ray <$> trace ray sceneShapes where
+  ray :: Ray
+  ray = applyCamera sceneCamera p
+{-# INLINEABLE render #-}
