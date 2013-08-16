@@ -37,11 +37,9 @@ mkCamera :: Vec  -- camera location
          -> Size
          -> Resolution
          -> Camera
-mkCamera loc lookAt up focus size res =
-    Camera loc dir focus orient size res
-  where
-    dir    = normalize $ lookAt - loc
-    orient = (normalize up, normalize $ dir `cross` up)
+mkCamera loc lookAt up focus = Camera loc dir focus orient where
+  dir    = normalize $ lookAt - loc
+  orient = (normalize up, normalize $ dir `cross` up)
 
 applyCamera :: Camera -> (Int, Int) -> Ray
 applyCamera (Camera { .. }) (x, y) = Ray { .. }
@@ -54,6 +52,6 @@ applyCamera (Camera { .. }) (x, y) = Ray { .. }
     shiftUp    = (fromIntegral y - mh) * sizeH  / mh
     shiftRight = (fromIntegral x - mw) * sizeW / mw
     rayOrigin    = camLocation + rayDirection
-    rayDirection = normalize $ (camFocus `scale` camDirection +
-                                shiftUp `scale` screenUp +
-                                shiftRight `scale` screenRight)
+    rayDirection = normalize (camFocus `scale` camDirection +
+                              shiftUp `scale` screenUp +
+                              shiftRight `scale` screenRight)

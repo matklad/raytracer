@@ -4,7 +4,7 @@ module Text.Obj
     ( parse
     ) where
 
-import Data.Maybe (catMaybes)
+import Data.Maybe (mapMaybes)
 
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Array as A
@@ -26,12 +26,12 @@ parse s =
 
     tokens = tail . B.words
     readVert l =
-        case catMaybes $ map readDouble (tokens l) of
+        case mapMaybes readDouble (tokens l) of
             [(x, _), (y, _), (z, _)] -> (x, y, z)
             _ -> error "Expected three doubles in vertex!"
 
     readFaceBlock b = case B.readInt (head $ B.split '/' b) of
-        Just (x, _)  -> verts A.! (pred x)
+        Just (x, _)  -> verts A.! pred x
         Nothing -> error "Expected Int in face"
 
     readFace l = map readFaceBlock (tokens l)
