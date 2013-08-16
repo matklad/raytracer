@@ -4,7 +4,7 @@ module Text.Obj
     ( parse
     ) where
 
-import Data.Maybe (mapMaybes)
+import Data.Maybe (mapMaybe)
 
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Array as A
@@ -26,7 +26,7 @@ parse s =
 
     tokens = tail . B.words
     readVert l =
-        case mapMaybes readDouble (tokens l) of
+        case mapMaybe readDouble (tokens l) of
             [(x, _), (y, _), (z, _)] -> (x, y, z)
             _ -> error "Expected three doubles in vertex!"
 
