@@ -47,10 +47,10 @@ applyCamera (Camera { .. }) (x, y) = Ray { .. }
     (resolutionW, resolutionH) = camScreenResolution
     (sizeW, sizeH) = camScreenSize
     (screenUp, screenRight) = camScreenOrientation
-    mw = fromIntegral resolutionW / 2.0
-    mh = fromIntegral resolutionH / 2.0
-    shiftUp    = (fromIntegral y - mh) * sizeH  / mh
-    shiftRight = (fromIntegral x - mw) * sizeW / mw
+    mw = fromIntegral resolutionW
+    mh = fromIntegral resolutionH
+    shiftUp    = (fromIntegral y - mh / 2.0) * sizeH  / mh
+    shiftRight = (fromIntegral x - mw / 2.0) * sizeW / mw
     rayOrigin    = camLocation + rayDirection
     rayDirection = normalize (camFocus `scale` camDirection +
                               shiftUp `scale` screenUp +

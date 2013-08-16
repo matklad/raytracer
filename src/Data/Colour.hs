@@ -10,6 +10,7 @@ module Data.Colour
     , red
     , green
     , blue
+    , black
     ) where
 
 import Data.Vec (Vec, vec)
@@ -37,3 +38,6 @@ green = rgb 0 0.7 0
 
 blue :: Colour
 blue = rgb 0 0 0.7
+
+black :: Colour
+black = rgb 0 0 0

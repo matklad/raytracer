@@ -12,7 +12,7 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
-import Data.Colour (Colour)
+import Data.Colour (Colour, black)
 import Data.Ray (Ray, applyRay)
 import Data.Vec (Vec)
 import Graphics.Camera (applyCamera)
@@ -31,12 +31,13 @@ trace ray shapes = case candidates of
       mapMaybe (\shape -> (shape, ) <$> shape `intersect` ray) shapes
 {-# INLINEABLE trace #-}
 
-shade :: Ray -> (SomeShape, Vec) -> Colour
-shade _ray (shape, v) = shape `colourAt` v
+shade :: Ray -> Maybe (SomeShape, Vec) -> Colour
+shade _ray (Just (shape, v)) = shape `colourAt` v
+shade _ray Nothing = black
 {-# INLINABLE shade #-}
 
-render :: Scene -> (Int, Int) -> Maybe Colour
-render (Scene { .. }) p = shade ray <$> trace ray sceneShapes where
+render :: Scene -> (Int, Int) -> Colour
+render (Scene { .. }) p = shade ray $ trace ray sceneShapes where
   ray :: Ray
   ray = applyCamera sceneCamera p
 {-# INLINEABLE render #-}
