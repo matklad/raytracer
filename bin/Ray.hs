@@ -4,6 +4,16 @@ import qualified Graphics.UI.GLUT as GLUT
 import qualified Graphics.Rendering.OpenGL as GL
 import Graphics.Rendering.OpenGL (($=))
 
+import Data.Vec(vec, cev)
+
+import Graphics.Camera(mkCamera, applyCamera)
+import Graphics.Shape(Sphere(..), Texture(..), SomeShape(..))
+import Graphics.Scene(Scene(..))
+import Graphics.Tracer(trace)
+import Data.Colour(red, black, getRGB)
+import Control.Monad(forM_)
+
+
 display :: IO ()
 display = do
     GL.clearColor $= GL.Color4 0 0 0 0
@@ -36,8 +46,36 @@ initGL = do
     GLUT.displayCallback $= display
     GLUT.reshapeCallback $= Just reshape
 
+--main :: IO ()
+--main = do
+--    (_, _) <- GLUT.getArgsAndInitialize
+--    createWindowGL "Ray Tracer"
+--    GLUT.mainLoop
+
 main :: IO ()
 main = do
-    (_, _) <- GLUT.getArgsAndInitialize
-    createWindowGL "Ray Tracer"
-    GLUT.mainLoop
+    let cLoc  = vec 10 0 5
+        cView = vec 0 0 5
+        cUp   = vec 0 0 1
+        cDist = 5
+        cSize = (10, 10)
+        x = 100
+        y = 100
+        cRes  = (x, y)
+        cam   = mkCamera cLoc cView cUp cDist cSize cRes
+        sphere = Sphere cView 3 (Solid red)
+        scene  = Scene { sceneCamera=cam
+                       , sceneShapes=[SomeShape sphere]
+                       , sceneColour=black}
+
+        colours = [[let
+                        ray = applyCamera cam (i, j)
+                        c = trace scene ray
+                        rgb = cev $ getRGB c
+                   in
+                    if rgb == (0.0, 0.0, 0.0)
+                    then '.'
+                    else 'X'
+                   | i <- [1..x]]
+                  | j <- [1..y]]
+    forM_ colours putStrLn

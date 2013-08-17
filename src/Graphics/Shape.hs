@@ -21,7 +21,10 @@ data Texture = Solid Colour
              | Procedure (Vec -> Colour)
              | Bitmap
 
-class Shape a where
+instance Show Texture where
+    show _ = "fuck"
+
+class (Show a) => Shape a where
     intersect :: a -> Ray -> Maybe Double
     normalAt  :: a -> Vec -> Normalized Vec
     texture   :: a -> Texture
@@ -34,6 +37,8 @@ class Shape a where
     {-# INLINE colourAt #-}
 
 data SomeShape = forall a. Shape a => SomeShape a
+instance Show SomeShape where
+    show (SomeShape x) = show x
 
 instance Shape SomeShape where
     intersect (SomeShape shape) = intersect shape
@@ -48,7 +53,7 @@ data Sphere = Sphere
     { sphereCenter  :: !Vec
     , sphereRadius  :: !Double
     , sphereTexture :: Texture
-    }
+    } deriving Show
 
 instance Shape Sphere where
     intersect (Sphere { .. }) (Ray { .. }) =
@@ -89,7 +94,7 @@ data Triangle = Triangle
     , triangleACxN :: !Vec
     , triangleABdACxN :: !Double
     , triangleACdABxN :: !Double
-    }
+    } deriving Show
 
 triangle :: Texture -> Vec -> Vec -> Vec -> Triangle
 triangle triangleTexture triangleA triangleB triangleC =

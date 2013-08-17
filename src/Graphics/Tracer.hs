@@ -12,12 +12,15 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
-import Data.Colour (Colour)
+import Data.Colour (Colour, black, red)
 import Data.Ray (Ray, applyRay)
-import Data.Vec (Vec)
+import Data.Vec (Vec, cev)
 import Graphics.Camera (applyCamera)
 import Graphics.Scene (Scene(..))
 import Graphics.Shape (Shape(..), SomeShape, colourAt)
+
+import Data.Vec(Vec)
+
 
 intersections :: [SomeShape] -> Ray -> [(SomeShape, Double)]
 intersections shapes ray =
@@ -25,18 +28,25 @@ intersections shapes ray =
 {-# INLINE intersections #-}
 
 trace :: Scene -> Ray -> Colour
-trace scene@(Scene { .. }) ray = shade scene ray $ do
-    (shape, d) <- closest
-    return (shape, applyRay ray d)
+trace scene@(Scene { .. }) ray =
+    let int = do
+            (shape, d) <- closest
+            return (shape, applyRay ray d)
+    in shade scene ray int
   where
     closest :: Maybe (SomeShape, Double)
-    closest = case intersections sceneShapes ray of
-        []          -> Nothing
-        candidates  -> Just $ minimumBy (compare `on` snd) candidates
+    closest =
+        case intersections sceneShapes ray of
+            []          -> Nothing
+            candidates  -> (Just $ minimumBy (compare `on` snd) candidates)
+
 {-# INLINEABLE trace #-}
 
 shade :: Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
-shade (Scene { sceneColour }) _ray = maybe sceneColour (uncurry colourAt)
+shade (Scene { sceneColour }) _ray x =
+    case x of
+        Nothing -> black
+        (Just _) -> red
 {-# INLINABLE shade #-}
 
 render :: Scene -> (Int, Int) -> Colour
@@ -44,3 +54,5 @@ render scene@(Scene { .. }) p = trace scene ray where
   ray :: Ray
   ray = applyCamera sceneCamera p
 {-# INLINEABLE render #-}
+
+

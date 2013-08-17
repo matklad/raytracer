@@ -6,7 +6,7 @@ module Data.Colour
     ( Colour
     , rgb
     , scale
-
+    , getRGB
     , red
     , green
     , blue
@@ -14,6 +14,8 @@ module Data.Colour
     ) where
 
 import Data.Vec (Vec, vec)
+
+import Debug.Trace(traceShow)
 
 -- | Colour in float RGB representation, each of the three components
 --   is a float from @[0, 1]@.
