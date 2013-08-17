@@ -41,6 +41,8 @@ instance Shape SomeShape where
     texture (SomeShape shape)   = texture shape
 
 -- * Shapes
+eps:: Double
+eps = 0.00001
 
 data Sphere = Sphere
     { sphereCenter  :: !Vec
@@ -115,12 +117,17 @@ instance Shape Triangle where
         -- t = (A - O)*N / DN
         -- p = (t*D - (A - O)) * ACxN / (AB*ACxN)
         -- q = (t*D - (A - O)) * ABxN / (AC*ABxN)
-        if t > 0 && (0 <= p && p <= 1) && (0 <= q && q <= 1) && (p + q <= 1)
+        if denom * denom > eps
+           && t > 0
+           && (0 <= p && p <= 1)
+           && (0 <= q && q <= 1)
+           && (p + q <= 1)
         then Just t
         else Nothing
       where
         ao = triangleA - rayOrigin
-        t = (ao `dot` triangleN) / (rayDirection `dot` triangleN)
+        denom = rayDirection `dot` triangleN
+        t = (ao `dot` triangleN) / denom 
         tdo = scale t rayDirection - ao
         p = (tdo `dot` triangleACxN) / triangleABdACxN
         q = (tdo `dot` triangleABxN) / triangleACdABxN
