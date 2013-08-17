@@ -5,6 +5,7 @@
 module Data.Colour
     ( Colour
     , rgb
+    , toGL
     , scale
 
     , red
@@ -13,7 +14,8 @@ module Data.Colour
     , black
     ) where
 
-import Data.Vec (Vec, vec)
+import qualified Graphics.Rendering.OpenGL as GL
+import Data.Vec (Vec, vec, cev)
 
 -- | Colour in float RGB representation, each of the three components
 --   is a float from @[0, 1]@.
@@ -41,3 +43,9 @@ blue = rgb 0 0 0.7
 
 black :: Colour
 black = rgb 0 0 0
+
+toGL :: Colour -> GL.Color3 GL.GLfloat
+toGL c = let (r, g, b) = cev . getRGB $ c
+             aux = fromRational . toRational
+         in
+          GL.Color3 (aux r) (aux g) (aux b)

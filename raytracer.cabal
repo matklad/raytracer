@@ -42,3 +42,4 @@ library
                    , bytestring        == 0.10.*
                    , array             == 0.4.*
                    , attoparsec        == 0.10.4.*
+                   , OpenGL            == 2.8.*

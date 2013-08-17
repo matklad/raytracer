@@ -5,6 +5,7 @@
 module Graphics.Tracer
     ( trace
     , render
+    , renderAll
     ) where
 
 import Control.Applicative ((<$>))
@@ -15,7 +16,7 @@ import Data.Maybe (mapMaybe)
 import Data.Colour (Colour)
 import Data.Ray (Ray, applyRay)
 import Data.Vec (Vec)
-import Graphics.Camera (applyCamera)
+import Graphics.Camera (applyCamera, camScreenResolution)
 import Graphics.Scene (Scene(..))
 import Graphics.Shape (Shape(..), SomeShape, colourAt)
 
@@ -44,3 +45,11 @@ render scene@(Scene { .. }) p = trace scene ray where
   ray :: Ray
   ray = applyCamera sceneCamera p
 {-# INLINEABLE render #-}
+
+
+renderAll :: Scene -> [((Int, Int), Colour)]
+renderAll scene =
+    let camera = sceneCamera scene
+        (w, h) = camScreenResolution camera
+    in
+     [((x, y), render scene (x, y))| y <- [0..w],x <- [0..h]]

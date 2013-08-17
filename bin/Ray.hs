@@ -1,20 +1,48 @@
 module Main (main) where
 
+import Control.Monad(forM_)
+
 import qualified Graphics.UI.GLUT as GLUT
 import qualified Graphics.Rendering.OpenGL as GL
 import Graphics.Rendering.OpenGL (($=))
+
+import Graphics.Scene(Scene(..))
+import Graphics.Camera(mkCamera)
+import Graphics.Shape(sphere, Texture(..), SomeShape(..))
+import Graphics.Tracer(renderAll)
+import Data.Colour(red, black, toGL)
+import Data.Vec(vec)
+
+scene:: Scene
+scene =
+    let cLoc  = vec 10 0 5
+        cView = vec 0 0 5
+        cUp   = vec 0 0 1
+        cDist = 5
+        width = 640
+        heigth = 480
+        cSize = (64, 48)
+        cRes  = (width, heigth)
+        cam   = mkCamera cLoc cView cUp cDist cSize cRes
+        s = sphere (Solid red) cView 8
+    in Scene { sceneCamera=cam
+             , sceneShapes=[SomeShape s]
+             , sceneColour=black}
+
 
 display :: IO ()
 display = do
     GL.clearColor $= GL.Color4 0 0 0 0
     GL.clear [GL.ColorBuffer]
-    GL.renderPrimitive GL.Lines $ do
-      GL.color $ GL.Color3 (1.0 :: GL.GLfloat) 0 0
-      GL.vertex $ GL.Vertex2 (0 :: GL.GLfloat) 0
-      GL.vertex $ GL.Vertex2 (640 :: GL.GLfloat) 480
-      GL.vertex $ GL.Vertex2 (0 :: GL.GLfloat) 480
-      GL.vertex $ GL.Vertex2 (640 :: GL.GLfloat) 0
+    GL.renderPrimitive GL.Points $ forM_ (renderAll scene) drawPixel
     GLUT.flush
+  where
+    drawPixel ((x, y), color) = do
+        GL.color $ toGL color
+        GL.vertex $ GL.Vertex2 (aux x) (aux y)
+    aux :: Int -> GL.GLfloat
+    aux = fromRational . toRational
+
 
 reshape :: GL.Size -> IO ()
 reshape _ = do

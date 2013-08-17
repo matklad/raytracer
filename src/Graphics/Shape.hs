@@ -7,7 +7,7 @@ module Graphics.Shape
 
     , Texture(..)
 
-    , Sphere(..)
+    , sphere
     , triangle
     ) where
 
@@ -49,6 +49,9 @@ data Sphere = Sphere
     , sphereRadius  :: !Double
     , sphereTexture :: Texture
     }
+
+sphere:: Texture -> Vec -> Double -> Sphere
+sphere sphereTexture sphereCenter sphereRadius = Sphere { .. }
 
 instance Shape Sphere where
     intersect (Sphere { .. }) (Ray { .. }) =
