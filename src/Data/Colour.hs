@@ -12,6 +12,7 @@ module Data.Colour
     , green
     , blue
     , black
+    , white
     ) where
 
 import qualified Graphics.Rendering.OpenGL as GL
@@ -43,6 +44,9 @@ blue = rgb 0 0 0.7
 
 black :: Colour
 black = rgb 0 0 0
+
+white :: Colour
+white = rgb 0.9 0.9 0.9
 
 toGL :: Colour -> GL.Color3 GL.GLfloat
 toGL c = let (r, g, b) = cev . getRGB $ c
