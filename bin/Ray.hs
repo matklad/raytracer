@@ -8,14 +8,14 @@ import Graphics.Rendering.OpenGL (($=))
 
 import Graphics.Scene(Scene(..))
 import Graphics.Camera(mkCamera)
-import Graphics.Shape(sphere, Texture(..), SomeShape(..))
+import Graphics.Shape(sphere, triangle, Texture(..), SomeShape(..))
 import Graphics.Tracer(renderAll)
-import Data.Colour(red, black, toGL)
+import Data.Colour(red, black, green, toGL)
 import Data.Vec(vec)
 
 scene:: Scene
 scene =
-    let cLoc  = vec 10 0 5
+    let cLoc  = vec 15 0 5
         cView = vec 0 0 5
         cUp   = vec 0 0 1
         cDist = 5
@@ -24,9 +24,13 @@ scene =
         cSize = (64, 48)
         cRes  = (width, heigth)
         cam   = mkCamera cLoc cView cUp cDist cSize cRes
-        s = sphere (Solid red) cView 8
+        s = sphere (Solid red) cView 7
+        ta = vec 7 5 0
+        tb = vec 7 (-5) 0
+        tc = vec 0 0 20
+        t = triangle (Solid green) ta tb tc
     in Scene { sceneCamera=cam
-             , sceneShapes=[SomeShape s]
+             , sceneShapes=[SomeShape s, SomeShape t]
              , sceneColour=black}
 
 
