@@ -21,7 +21,7 @@ newtype Colour = Colour { getRGB :: Vec }
   deriving (Show, Eq, Ord, Num, Fractional)
 
 rgb :: Double -> Double -> Double -> Colour
-rgb r g b = Colour . fmap (min 0 . max 1) $ vec r g b
+rgb r g b = Colour . fmap (min 1 . max 0) $ vec r g b
 {-# INLINE rgb #-}
 
 scale :: Colour -> Vec -> Colour
