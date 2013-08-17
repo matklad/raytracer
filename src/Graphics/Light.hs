@@ -26,6 +26,6 @@ instance LightSource PointSource where
     shade (PointSource { .. }) v n = (direction, intensivity)
       where
         direction   = normalize $ v - pointSourcePosition
-        intensivity = direction `dot` n 
+        intensivity = max 0 $ direction `dot` n 
 
         
