@@ -5,7 +5,7 @@ module Data.Ray
     , applyRay
     ) where
 
-import Data.Vec (Vec(..), Normalized, scale)
+import Data.Vec (Vec, Normalized, scale)
 
 
 
