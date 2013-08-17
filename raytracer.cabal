@@ -33,6 +33,9 @@ library
 
                    , Data.Vec
                    , Data.Ray
+                   , Data.Colour
+
+  other-modules:     Data.Vec.Internal
 
   build-depends:     base              == 4.6.*
                    , bytestring-lexing == 0.4.*
