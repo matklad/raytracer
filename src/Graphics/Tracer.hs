@@ -13,12 +13,13 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
-import Data.Colour (Colour)
+import Data.Colour (Colour, black)
+import Data.Material (Material, materialAmbient)
 import Data.Ray (Ray, applyRay)
 import Data.Vec (Vec)
 import Graphics.Camera (applyCamera, camScreenResolution)
 import Graphics.Scene (Scene(..))
-import Graphics.Shape (Shape(..), SomeShape, colourAt)
+import Graphics.Shape (Shape(..), SomeShape(..), colourAt)
 
 intersections :: [SomeShape] -> Ray -> [(SomeShape, Double)]
 intersections shapes ray =
@@ -37,7 +38,14 @@ trace scene@(Scene { .. }) ray = shade scene ray $ do
 {-# INLINEABLE trace #-}
 
 shade :: Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
-shade (Scene { sceneColour }) _ray = maybe sceneColour (uncurry colourAt)
+shade (Scene { .. }) _ Nothing = sceneColour
+shade (Scene { .. }) _view (Just (shape, point)) =
+    ambient + diffuse + specular
+  where
+    baseColour = colourAt shape point
+    ambient    = baseColour * (materialAmbient . material $ shape) * sceneLight
+    diffuse    = black
+    specular   = black
 {-# INLINABLE shade #-}
 
 render :: Scene -> (Int, Int) -> Colour

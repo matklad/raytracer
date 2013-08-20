@@ -10,4 +10,5 @@ data Scene = Scene
     { sceneCamera :: !Camera
     , sceneShapes :: ![SomeShape]
     , sceneColour :: !Colour
+    , sceneLight  :: !Colour
     }

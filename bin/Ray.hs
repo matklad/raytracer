@@ -10,7 +10,7 @@ import Graphics.Scene(Scene(..))
 import Graphics.Camera(mkCamera)
 import Graphics.Shape(sphere, triangle, Texture(..), SomeShape(..))
 import Graphics.Tracer(renderAll)
-import Data.Colour(red, black, green, toGL)
+import Data.Colour(red, black, green, white, toGL)
 import Data.Vec(vec)
 
 scene:: Scene
@@ -24,14 +24,15 @@ scene =
         cSize = (64, 48)
         cRes  = (width, heigth)
         cam   = mkCamera cLoc cView cUp cDist cSize cRes
-        s = sphere (Solid red) cView 7
+        s = sphere (Solid white) cView 7
         ta = vec 7 5 0
         tb = vec 7 (-5) 0
         tc = vec 0 0 20
         t = triangle (Solid green) ta tb tc
     in Scene { sceneCamera=cam
              , sceneShapes=[SomeShape s, SomeShape t]
-             , sceneColour=black}
+             , sceneColour=black
+             , sceneLight=green + red}
 
 
 display :: IO ()

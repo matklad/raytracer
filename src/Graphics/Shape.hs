@@ -12,6 +12,7 @@ module Graphics.Shape
     ) where
 
 import Data.Colour (Colour)
+import Data.Material (Material, simpleMaterial)
 import Data.Vec (Vec, Normalized, dot, normalize, scale, cross)
 import Data.Ray (Ray(..))
 
@@ -33,21 +34,24 @@ class Shape a where
       go _t            = undefined
     {-# INLINE colourAt #-}
 
+    material :: a -> Material
+
 data SomeShape = forall a. Shape a => SomeShape a
 
 instance Shape SomeShape where
     intersect (SomeShape shape) = intersect shape
     normalAt (SomeShape shape)  = normalAt shape
     texture (SomeShape shape)   = texture shape
+    material (SomeShape shape)  = material shape
 
 -- * Shapes
 eps:: Double
 eps = 0.00001
 
 data Sphere = Sphere
-    { sphereCenter  :: !Vec
-    , sphereRadius  :: !Double
-    , sphereTexture :: Texture
+    { sphereCenter   :: !Vec
+    , sphereRadius   :: !Double
+    , sphereTexture  :: Texture
     }
 
 sphere:: Texture -> Vec -> Double -> Sphere
@@ -77,13 +81,13 @@ instance Shape Sphere where
 
     normalAt (Sphere { .. }) x = normalize (x - sphereCenter)
     texture = sphereTexture
-
+    material = const simpleMaterial
 
 data Triangle = Triangle
     { triangleA :: !Vec
     , triangleB :: !Vec
     , triangleC :: !Vec
-    , triangleTexture :: Texture
+    , triangleTexture  :: Texture
       -- microoptimization: precomputed constants
     , triangleAB   :: !Vec
     , triangleAC   :: !Vec
@@ -113,7 +117,7 @@ instance Shape Triangle where
         --   /   -
         --  /     \
         -- A------>C
-        --     q
+        --
         -- triangle equation:: pAB + qAC + A , 0<=p, q, p+q<=1
         -- ray equation     :: O + t*D
         -- t*D = pAB + qAC + A - O   -- `dot` N
@@ -130,7 +134,7 @@ instance Shape Triangle where
       where
         ao = triangleA - rayOrigin
         denom = rayDirection `dot` triangleN
-        t = (ao `dot` triangleN) / denom 
+        t = (ao `dot` triangleN) / denom
         tdo = scale t rayDirection - ao
         p = (tdo `dot` triangleACxN) / triangleABdACxN
         q = (tdo `dot` triangleABxN) / triangleACdABxN
@@ -139,3 +143,4 @@ instance Shape Triangle where
     normalAt t _ = triangleN t
 
     texture = triangleTexture
+    material = const simpleMaterial

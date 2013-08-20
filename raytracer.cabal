@@ -27,6 +27,7 @@ library
   exposed-modules:   Data.Vec
                    , Data.Ray
                    , Data.Colour
+                   , Data.Material
 
                    , Graphics.Camera
                    , Graphics.Scene
@@ -35,8 +36,6 @@ library
                    , Graphics.Tracer
                    , Text.Obj
                    , Text.Mtl
-
-
 
 
   other-modules:     Data.Vec.Internal
