@@ -1,18 +1,18 @@
 module Main (main) where
 
-import Control.Monad(forM_)
+import Control.Monad (forM_)
 
+import Graphics.Rendering.OpenGL (($=))
 import qualified Graphics.UI.GLUT as GLUT
 import qualified Graphics.Rendering.OpenGL as GL
-import Graphics.Rendering.OpenGL (($=))
 
-import Graphics.Scene(Scene(..))
-import Graphics.Camera(mkCamera)
-import Graphics.Shape(sphere, triangle, Texture(..), SomeShape(..))
-import Graphics.Tracer(renderAll)
-import Data.Colour(red, black, green, white, toGL)
-import Data.Vec(vec)
-
+import Data.Colour (red, black, green, white, rgb, toGL)
+import Data.Vec (vec, normalize)
+import Graphics.Camera (mkCamera)
+import Graphics.Scene (Scene(..))
+import Graphics.Shape (Texture(..), SomeShape(..), sphere, triangle, plane)
+import Graphics.Tracer (renderAll)
+g
 scene:: Scene
 scene =
     let cLoc  = vec 15 0 5
@@ -29,10 +29,12 @@ scene =
         tb = vec 7 (-5) 0
         tc = vec 0 0 20
         t = triangle (Solid green) ta tb tc
-    in Scene { sceneCamera=cam
-             , sceneShapes=[SomeShape s, SomeShape t]
-             , sceneColour=black
-             , sceneLight=green + red}
+        p = plane (Solid $ rgb 0.5 0.5 0.5) ta (normalize $ vec (-5) 5 5)
+    in Scene { sceneCamera = cam
+             , sceneShapes = [SomeShape s, SomeShape t, SomeShape p]
+             , sceneColour = black
+             , sceneLight  = green + red
+             }
 
 
 display :: IO ()

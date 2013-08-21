@@ -1,5 +1,6 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Graphics.Shape
     ( Shape(..)
@@ -9,13 +10,14 @@ module Graphics.Shape
 
     , sphere
     , triangle
+    , plane
     ) where
 
 import Data.Colour (Colour)
 import Data.Material (Material, simpleMaterial)
 import Data.Vec (Vec, Normalized, dot, normalize, scale, cross)
 import Data.Ray (Ray(..))
-
+import Graphics.Internal ((~/=))
 
 
 data Texture = Solid Colour
@@ -45,21 +47,20 @@ instance Shape SomeShape where
     material (SomeShape shape)  = material shape
 
 -- * Shapes
-eps:: Double
-eps = 0.00001
 
 data Sphere = Sphere
-    { sphereCenter   :: !Vec
-    , sphereRadius   :: !Double
-    , sphereTexture  :: Texture
+    { sphereCenter  :: !Vec
+    , sphereRadius  :: !Double
+    , sphereTexture :: !Texture
     }
 
-sphere:: Texture -> Vec -> Double -> Sphere
+sphere :: Texture -> Vec -> Double -> Sphere
 sphere sphereTexture sphereCenter sphereRadius = Sphere { .. }
+{-# INLINE sphere #-}
 
 instance Shape Sphere where
     intersect (Sphere { .. }) (Ray { .. }) =
-        -- sphere equation:: (C - X)^2 == r^2
+        -- Sphere equation:: (C - X)^2 == r^2
         -- ray equation::    (O + t*D)
         -- combined and simplified:
         -- t^2 * D^2 -2t * D(C-O) + (C-O)^2 - r^2== 0
@@ -79,7 +80,7 @@ instance Shape Sphere where
         t1 = (b - rd) / a
         t2 = (b + rd) / a
 
-    normalAt (Sphere { .. }) x = normalize (x - sphereCenter)
+    normalAt (Sphere { sphereCenter }) x = normalize $ x - sphereCenter
     texture = sphereTexture
     material = const simpleMaterial
 
@@ -124,7 +125,7 @@ instance Shape Triangle where
         -- t = (A - O)*N / DN
         -- p = (t*D - (A - O)) * ACxN / (AB*ACxN)
         -- q = (t*D - (A - O)) * ABxN / (AC*ABxN)
-        if denom * denom > eps
+        if denom * denom ~/= 0
            && t > 0
            && (0 <= p && p <= 1)
            && (0 <= q && q <= 1)
@@ -139,8 +140,38 @@ instance Shape Triangle where
         p = (tdo `dot` triangleACxN) / triangleABdACxN
         q = (tdo `dot` triangleABxN) / triangleACdABxN
 
+    normalAt = const . triangleN
+    texture  = triangleTexture
+    material = const simpleMaterial
 
-    normalAt t _ = triangleN t
 
-    texture = triangleTexture
+data Plane = Plane
+    { planeOffset  :: !Vec
+    , planeNormal  :: !(Normalized Vec)
+    , planeTexture :: !Texture
+    }
+
+plane :: Texture -> Vec -> Normalized Vec -> Plane
+plane planeTexture planeOffset planeNormal = Plane { .. }
+{-# INLINE plane #-}
+
+instance Shape Plane where
+    intersect (Plane { .. }) (Ray { .. }) =
+        -- (X - P) * N = 0    Plane
+        -- X = O + t * D      Ray
+        --
+        -- Combined:
+        -- (O + t * D - P) * N = 0
+        -- t * D * N + (O - P) * N = 0
+        -- t = (P - O) * N / (D * N)
+        if t >= 0
+        then Just t
+        else Nothing
+      where
+        t = p / q
+        p = (planeOffset - rayOrigin) `dot` planeNormal
+        q = rayDirection `dot` planeNormal
+
+    normalAt = const . planeOffset
+    texture  = planeTexture
     material = const simpleMaterial
