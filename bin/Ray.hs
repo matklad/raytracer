@@ -12,7 +12,7 @@ import Graphics.Camera (mkCamera)
 import Graphics.Scene (Scene(..))
 import Graphics.Shape (Texture(..), SomeShape(..), sphere, triangle, plane)
 import Graphics.Tracer (renderAll)
-g
+
 scene:: Scene
 scene =
     let cLoc  = vec 15 0 5

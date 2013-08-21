@@ -164,7 +164,7 @@ instance Shape Plane where
         -- (O + t * D - P) * N = 0
         -- t * D * N + (O - P) * N = 0
         -- t = (P - O) * N / (D * N)
-        if t >= 0
+        if t >= 0 && q ~/= 0
         then Just t
         else Nothing
       where
@@ -172,6 +172,6 @@ instance Shape Plane where
         p = (planeOffset - rayOrigin) `dot` planeNormal
         q = rayDirection `dot` planeNormal
 
-    normalAt = const . planeOffset
+    normalAt = const . planeNormal
     texture  = planeTexture
     material = const simpleMaterial
