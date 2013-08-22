@@ -21,20 +21,21 @@ import Graphics.Camera (applyCamera, camScreenResolution)
 import Graphics.Scene (Scene(..))
 import Graphics.Shape (Shape(..), SomeShape(..), colourAt)
 
-intersections :: [SomeShape] -> Ray -> [(SomeShape, Double)]
-intersections shapes ray =
-    mapMaybe (\shape -> (shape, ) <$> shape `intersect` ray) shapes
-{-# INLINE intersections #-}
+
+findIntersection :: [SomeShape] -> Ray -> Maybe (SomeShape, Double)
+findIntersection shapes ray = case all_intersections of
+    [] -> Nothing
+    candidates  -> Just $ minimumBy (compare `on` snd) candidates
+  where
+    aux shape = (shape, ) <$> shape `intersect` ray
+    all_intersections = mapMaybe aux shapes
+{-# INLINE findIntersection #-}
 
 trace :: Scene -> Ray -> Colour
 trace scene@(Scene { .. }) ray = shade scene ray $ do
-    (shape, d) <- closest
+    (shape, d) <- findIntersection sceneShapes ray
     return (shape, applyRay ray d)
-  where
-    closest :: Maybe (SomeShape, Double)
-    closest = case intersections sceneShapes ray of
-        []          -> Nothing
-        candidates  -> Just $ minimumBy (compare `on` snd) candidates
+
 {-# INLINEABLE trace #-}
 
 shade :: Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
