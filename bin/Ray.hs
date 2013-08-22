@@ -10,7 +10,7 @@ import Data.Colour (red, black, green, white, toGL)
 import Data.Vec (Vec, vec)
 import Graphics.Camera (Camera, mkCamera)
 import Graphics.Scene (Scene(..))
-import Graphics.Shape (Texture(..), SomeShape(..), sphere)
+import Graphics.Shape (Texture(..), SomeShape(..), sphere, plane)
 import Graphics.Tracer (renderAll)
 
 
@@ -20,15 +20,18 @@ resolution = (640, 480)
 origin :: Vec
 origin = vec 0 0 0
 
+up :: Vec
+up = vec 0 0 1
 camera :: Camera
-camera = mkCamera (vec 0 5 8) origin (vec 0 0 1) 4 (0.4, 0.3) resolution
+camera = mkCamera (vec 0 5 8) origin up 4 (0.4, 0.3) resolution
 
 scene :: Scene
 scene =
     let
-        s = sphere (Solid white) (origin + vec 0.3 0 0) 0.1
+        s = sphere (Solid white) (origin + vec 0.3 0 0.1) 0.1
+        p = plane (Solid red) origin up
     in Scene { sceneCamera = camera
-             , sceneShapes = [SomeShape s]
+             , sceneShapes = [SomeShape s, SomeShape p]
              , sceneColour = black
              , sceneLight  = green + red
              }
