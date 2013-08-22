@@ -1,3 +1,4 @@
+{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Graphics.Light
@@ -8,12 +9,23 @@ module Graphics.Light
 import Data.Colour(Colour, white)
 import Data.Vec(Vec, Normalized, dot, normalize)
 
+data Light = Light
+  { lightDirection :: !Vec
+  , lightColour    :: !Colour
+  , lightPower     :: !Double
+  }
+
 class LightSource a where
     colour :: a -> Colour
     colour = const white
 
-    shade :: a -> Vec -> Normalized Vec -> (Normalized Vec, Double)
+    shade :: a -> Vec -> Normalized Vec -> Light
 
+data SomeLight = forall a. LightSource a => SomeLight a
+
+instance LightSource SomeLight where
+    colour (SomeLight l) = colour l
+    shade (SomeLight l)  = shade l
 
 data PointSource = PointSource
     { pointSourcePosition :: !Vec
@@ -23,9 +35,10 @@ data PointSource = PointSource
 
 instance LightSource PointSource where
     colour = pointSourceColour
-    shade (PointSource { .. }) v n = (direction, intensivity)
+    shade (PointSource { .. }) point norm = Light { .. }
       where
-        direction   = normalize $ v - pointSourcePosition
-        intensivity = max 0 $ direction `dot` n 
+        lightDirection = normalize $ pointSourcePosition - point
+        lightColour    = pointSourceColour
+        lightPower     = max 0 $ lightDirection `dot` norm
 
         
