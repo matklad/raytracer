@@ -6,13 +6,13 @@ import Graphics.Rendering.OpenGL (($=))
 import qualified Graphics.UI.GLUT as GLUT
 import qualified Graphics.Rendering.OpenGL as GL
 
-import Data.Colour (red, black, blue, white, toGL)
-import Data.Vec (Vec, vec)
+import Data.Colour (red, black, blue, white, toGL, green)
+import Data.Vec (Vec, vec, scale)
 import Graphics.Camera (Camera, mkCamera)
 import Graphics.Scene (Scene(..))
 import Graphics.Shape (Texture(..), SomeShape(..), sphere, plane)
 import Graphics.Tracer (renderAll)
-
+import Graphics.Light (PointSource(..), SomeLight(..))
 
 resolution :: (Int, Int)
 resolution = (640, 480)
@@ -28,13 +28,17 @@ camera = mkCamera (vec 0 5 8) origin up 4 (0.4, 0.3) resolution
 scene :: Scene
 scene =
     let
-        p = plane (Solid blue) origin up
+        p = plane (Solid white) (origin + vec 0 0 0.0) up
         s1 = sphere (Solid white) (origin + vec (-0.1) 0.0 0.1) 0.1
-        s2 = sphere (Solid red) (origin + vec 0.1 0.0 0.1) 0.1
+        s2 = sphere (Solid red)   (origin + vec   0.1  0.02 0.1) 0.1
+
+        light1 = PointSource (vec (-3) (-3) 1) (scale 0.3 red)
+        light2 = PointSource (vec (3) (3) 1) (scale 0.3 green)
     in Scene { sceneCamera = camera
              , sceneShapes = [SomeShape s1, SomeShape s2, SomeShape p]
+             , sceneLights = [SomeLight light1, SomeLight light2]
              , sceneColour = black
-             , sceneLight  = white
+             , sceneLight  = scale 0.1 white
              }
 
 display :: IO ()

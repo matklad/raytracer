@@ -6,7 +6,7 @@
 module Data.Vec.Internal
     ( Vec(..)
     , Normalized
-    , length
+    , norm
 
     , scale
     , normalize
@@ -14,7 +14,7 @@ module Data.Vec.Internal
     , cross
     ) where
 
-import Prelude hiding (sum, zipWith, length)
+import Prelude hiding (sum, zipWith)
 
 import Data.Foldable (Foldable(..), sum)
 import Data.Monoid (Monoid(..), Sum, Product)
@@ -65,10 +65,10 @@ singleton c = Vec { vecX = c, vecY = c, vecZ = c}
 {-# SPECIALIZE INLINE singleton :: Double -> Vec Double #-}
 
 -- | Computes L2-norm of the vector.
-length :: (Floating a, Num a) => Vec a -> a
-length v = sqrt $! dot v v
-{-# INLINEABLE length #-}
-{-# SPECIALIZE INLINE length :: Vec Double -> Double #-}
+norm :: (Floating a, Num a) => Vec a -> a
+norm v = sqrt $! dot v v
+{-# INLINEABLE norm #-}
+{-# SPECIALIZE INLINE norm :: Vec Double -> Double #-}
 
 -- | Scales a vector by a constant factor @f@.
 scale :: Num a => a -> Vec a -> Vec a
@@ -78,7 +78,7 @@ f `scale` v = fmap (* f) v
 
 -- | Computes a unit vector, in the direction of @v@.
 normalize :: Floating a => Vec a -> Normalized (Vec a)
-normalize v = fmap (/ length v) v
+normalize v = fmap (/ norm v) v
 {-# INLINEABLE normalize #-}
 {-# SPECIALIZE INLINE normalize :: Vec Double -> Normalized (Vec Double) #-}
 

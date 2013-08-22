@@ -7,7 +7,7 @@ module Data.Vec
 
     , Internal.Normalized
 
-    , Internal.length
+    , Internal.norm
     , Internal.scale
     , Internal.normalize
     , Internal.dot
