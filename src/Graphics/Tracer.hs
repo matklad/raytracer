@@ -60,4 +60,4 @@ renderAll scene =
     let camera = sceneCamera scene
         (w, h) = camScreenResolution camera
     in
-     [((x, y), render scene (x, y))| y <- [0..w],x <- [0..h]]
+     [((x, y), render scene (x, y))| x <- [0..w], y <- [0..h]]

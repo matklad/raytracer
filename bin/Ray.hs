@@ -6,36 +6,32 @@ import Graphics.Rendering.OpenGL (($=))
 import qualified Graphics.UI.GLUT as GLUT
 import qualified Graphics.Rendering.OpenGL as GL
 
-import Data.Colour (red, black, green, white, rgb, toGL)
-import Data.Vec (vec, normalize)
-import Graphics.Camera (mkCamera)
+import Data.Colour (red, black, green, white, toGL)
+import Data.Vec (Vec, vec)
+import Graphics.Camera (Camera, mkCamera)
 import Graphics.Scene (Scene(..))
-import Graphics.Shape (Texture(..), SomeShape(..), sphere, triangle, plane)
+import Graphics.Shape (Texture(..), SomeShape(..), sphere)
 import Graphics.Tracer (renderAll)
 
-scene:: Scene
+
+resolution :: (Int, Int)
+resolution = (640, 480)
+
+origin :: Vec
+origin = vec 0 0 0
+
+camera :: Camera
+camera = mkCamera (vec 0 5 8) origin (vec 0 0 1) 4 (0.4, 0.3) resolution
+
+scene :: Scene
 scene =
-    let cLoc  = vec 15 0 5
-        cView = vec 0 0 5
-        cUp   = vec 0 0 1
-        cDist = 5
-        width = 640
-        heigth = 480
-        cSize = (64, 48)
-        cRes  = (width, heigth)
-        cam   = mkCamera cLoc cView cUp cDist cSize cRes
-        s = sphere (Solid white) cView 7
-        ta = vec 7 5 0
-        tb = vec 7 (-5) 0
-        tc = vec 0 0 20
-        t = triangle (Solid green) ta tb tc
-        p = plane (Solid $ rgb 0.5 0.5 0.5) ta (normalize $ vec (-5) 5 5)
-    in Scene { sceneCamera = cam
-             , sceneShapes = [SomeShape s, SomeShape t, SomeShape p]
+    let
+        s = sphere (Solid white) (origin + vec 0.3 0 0) 0.1
+    in Scene { sceneCamera = camera
+             , sceneShapes = [SomeShape s]
              , sceneColour = black
              , sceneLight  = green + red
              }
-
 
 display :: IO ()
 display = do
