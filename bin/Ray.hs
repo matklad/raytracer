@@ -23,7 +23,7 @@ origin = vec 0 0 0
 up :: Vec
 up = vec 0 0 1
 camera :: Camera
-camera = mkCamera (vec 0 5 0) origin up 4 (0.4, 0.3) resolution
+camera = mkCamera (vec 0 5 8) origin up 4 (0.4, 0.3) resolution
 
 scene :: Scene
 scene =

@@ -31,7 +31,7 @@ data Camera = Camera
     } deriving (Eq, Show)
 
 mkCamera :: Vec    -- ^ camera location
-         -> Vec    -- ^ point on the screen
+         -> Vec    -- ^ point in the scene
          -> Vec    -- ^ up
          -> Double -- ^ distance to the screen
          -> Size
@@ -39,7 +39,9 @@ mkCamera :: Vec    -- ^ camera location
          -> Camera
 mkCamera loc lookAt up focus = Camera loc dir focus orient where
   dir    = normalize $ lookAt - loc
-  orient = (normalize up, normalize $ dir `cross` up)
+  right  = normalize $ dir `cross` up
+  up'    = normalize $ right `cross` dir 
+  orient = (up', right)
 
 applyCamera :: Camera -> (Int, Int) -> Ray
 applyCamera (Camera { .. }) (x, y) = Ray { .. }
