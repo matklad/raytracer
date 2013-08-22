@@ -29,8 +29,8 @@ scene :: Scene
 scene =
     let
         p = plane (Solid blue) origin up
-        s1 = sphere (Solid white) (origin + vec (-0.1) (0.0) (0.1)) 0.1
-        s2 = sphere (Solid red) (origin + vec (0.1) (0.0) (0.1)) 0.1
+        s1 = sphere (Solid white) (origin + vec (-0.1) 0.0 0.1) 0.1
+        s2 = sphere (Solid red) (origin + vec 0.1 0.0 0.1) 0.1
     in Scene { sceneCamera = camera
              , sceneShapes = [SomeShape s1, SomeShape s2, SomeShape p]
              , sceneColour = black

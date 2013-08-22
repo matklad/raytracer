@@ -84,8 +84,8 @@ instance Shape Sphere where
         t1 = (b - rd) / a
         t2 = (b + rd) / a
 
-        v1 = (applyRay ray t1 - sphereCenter)
-        v2 = (applyRay ray t2 - sphereCenter)
+        v1 = applyRay ray t1 - sphereCenter
+        v2 = applyRay ray t2 - sphereCenter
         miss1 = v1 `dot` v1 - rr
         miss2 = v2 `dot` v2 - rr
 
