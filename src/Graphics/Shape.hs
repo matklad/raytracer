@@ -13,10 +13,12 @@ module Graphics.Shape
     , plane
     ) where
 
+import Control.Exception.Base (assert)
+
 import Data.Colour (Colour)
 import Data.Material (Material, simpleMaterial)
 import Data.Vec (Vec, Normalized, dot, normalize, scale, cross)
-import Data.Ray (Ray(..))
+import Data.Ray (Ray(..), applyRay)
 import Graphics.Internal ((~/=))
 
 
@@ -59,7 +61,7 @@ sphere sphereTexture sphereCenter sphereRadius = Sphere { .. }
 {-# INLINE sphere #-}
 
 instance Shape Sphere where
-    intersect (Sphere { .. }) (Ray { .. }) =
+    intersect (Sphere { .. }) ray@(Ray { .. }) =
         -- Sphere equation:: (C - X)^2 == r^2
         -- ray equation::    (O + t*D)
         -- combined and simplified:
@@ -67,18 +69,26 @@ instance Shape Sphere where
         -- at^2 + 2bt + c == 0
         if d < 0
         then Nothing
-        else case filter (> 0) [t1, t2] of
-            [] -> Nothing
-            xs -> Just $! minimum xs
+        else assert (miss1 + miss2 <= 0.00001) $
+             case filter (> 0) [t1, t2] of
+                 [] -> Nothing
+                 xs -> Just $! seq miss2 (minimum xs)
       where
         co = sphereCenter - rayOrigin
         a  = rayDirection `dot` rayDirection
         b  = rayDirection `dot` co
-        c  = (co `dot` co) - sphereRadius*sphereRadius
+        rr = sphereRadius*sphereRadius
+        c  = (co `dot` co) - rr
         d  = b*b - a*c
         rd = sqrt d
         t1 = (b - rd) / a
         t2 = (b + rd) / a
+
+        v1 = (applyRay ray t1 - sphereCenter)
+        v2 = (applyRay ray t2 - sphereCenter)
+        miss1 = v1 `dot` v1 - rr
+        miss2 = v2 `dot` v2 - rr
+
 
     normalAt (Sphere { sphereCenter }) x = normalize $ x - sphereCenter
     texture = sphereTexture
