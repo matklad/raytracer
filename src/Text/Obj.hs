@@ -10,9 +10,12 @@ import qualified Data.ByteString.Char8 as B
 import qualified Data.Array as A
 import Data.ByteString.Lex.Double (readDouble)
 
-type Point = (Double, Double, Double)
+import Graphics.Shape (Texture(..), SomeShape(..), triangle)
+import Data.Colour (red)
+import Data.Vec (vec)
 
-parse:: B.ByteString -> [[Point]]
+
+parse:: B.ByteString -> [SomeShape]
 parse s =
     faces
   where
@@ -27,11 +30,13 @@ parse s =
     tokens = tail . B.words
     readVert l =
         case mapMaybe readDouble (tokens l) of
-            [(x, _), (y, _), (z, _)] -> (x, y, z)
+            [(x, _), (y, _), (z, _)] -> vec x y z
             _ -> error "Expected three doubles in vertex!"
 
     readFaceBlock b = case B.readInt (head $ B.split '/' b) of
         Just (x, _)  -> verts A.! pred x
         Nothing -> error "Expected Int in face"
 
-    readFace l = map readFaceBlock (tokens l)
+    readFace l = let [a, b, c] = map readFaceBlock (tokens l)
+                 in SomeShape $ triangle (Solid red) a b c
+

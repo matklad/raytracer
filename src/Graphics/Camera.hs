@@ -40,7 +40,7 @@ mkCamera :: Vec    -- ^ camera location
 mkCamera loc lookAt up focus = Camera loc dir focus orient where
   dir    = normalize $ lookAt - loc
   right  = normalize $ dir `cross` up
-  up'    = normalize $ right `cross` dir 
+  up'    = normalize $ right `cross` dir
   orient = (up', right)
 
 applyCamera :: Camera -> (Int, Int) -> Ray
