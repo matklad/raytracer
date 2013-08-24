@@ -14,9 +14,9 @@ import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
 import Data.Colour (Colour, black)
-import Data.Material (Material, materialAmbient, materialDiffuse)
+import Data.Material (Material(..))
 import Data.Ray (Ray(..), applyRay)
-import Data.Vec (Vec, scale)
+import Data.Vec (Vec, scale, dot)
 import Graphics.Camera (applyCamera, camScreenResolution)
 import Graphics.Scene (Scene(..))
 import Graphics.Shape (Shape(..), SomeShape(..), colourAt)
@@ -41,13 +41,13 @@ trace scene@(Scene { .. }) ray = shade scene ray $ do
 
 shade :: Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
 shade (Scene { .. }) _ Nothing = sceneColour
-shade (Scene { .. }) _view (Just (shape, point)) =
+shade (Scene { .. }) view (Just (shape, point)) =
     ambient + diffuse + specular
   where
     baseColour = colourAt shape point
     n = normalAt shape point
-    ambientK = materialAmbient . material $ shape
-    diffuseK = materialDiffuse . material $ shape
+    (Material { .. }) = material shape
+    viewDirection = rayDirection view
 
     isVisible :: Light -> Bool
     isVisible (Light { .. }) =
@@ -61,14 +61,27 @@ shade (Scene { .. }) _view (Just (shape, point)) =
 
     computeDiffuse :: Light -> Colour
     computeDiffuse (Light { .. }) =
-        scale lightPower (baseColour * lightColour * diffuseK)
+        scale lightPower (baseColour * lightColour * materialDiffuse)
+
+    computeSpecular :: Light -> Colour
+    computeSpecular (Light { .. }) =
+        let rview = reflect viewDirection n
+            k = (max 0 $ rview `dot` lightDirection) ** materialPhong
+        in scale k (lightColour * materialSpecular)
 
     visibleLights = filter isVisible $ map (\l -> shed l point n) sceneLights
 
-    ambient    = baseColour * ambientK * sceneLight
+    ambient    = baseColour * materialAmbient * sceneLight
     diffuse    = sum $ map computeDiffuse visibleLights
-    specular   = black
+    specular   = sum $ map computeSpecular visibleLights
 {-# INLINABLE shade #-}
+
+reflect :: Vec -> Vec -> Vec
+reflect v n = r
+  where
+    nproj = scale (v `dot` (-n)) n
+    d = v + nproj
+    r = nproj + d
 
 render :: Scene -> (Int, Int) -> Colour
 render scene@(Scene { .. }) p = trace scene ray where

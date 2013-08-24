@@ -45,5 +45,3 @@ instance LightSource PointSource where
         lightColour    = pointSourceColour
         lightPower     = max 0 $ lightDirection `dot` n
         lightDistance  = norm path
-
-        

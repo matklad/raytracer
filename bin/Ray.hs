@@ -33,7 +33,7 @@ scene =
         s2 = sphere (Solid red)   (origin + vec   0.1  0.02 0.1) 0.1
 
         light1 = PointSource (vec (-3) (-3) 1) (scale 0.3 red)
-        light2 = PointSource (vec (3) (3) 1) (scale 0.3 green)
+        light2 = PointSource (vec (3) (3) 1) (scale 0.8 white)
     in Scene { sceneCamera = camera
              , sceneShapes = [SomeShape s1, SomeShape s2, SomeShape p]
              , sceneLights = [SomeLight light1, SomeLight light2]
