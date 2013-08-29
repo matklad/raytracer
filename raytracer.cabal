@@ -28,12 +28,12 @@ library
   exposed-modules:   Data.Vec
                    , Data.Ray
                    , Data.Colour
-                   , Data.Material
 
-                   , Graphics.Camera
-                   , Graphics.Scene
-                   , Graphics.Shape
-                   , Graphics.Light
+                   , Graphics.Types.Material
+                   , Graphics.Types.Camera
+                   , Graphics.Types.Scene
+                   , Graphics.Types.Shape
+                   , Graphics.Types.Light
                    , Graphics.Tracer
                    , Text.Obj
                    , Text.Mtl

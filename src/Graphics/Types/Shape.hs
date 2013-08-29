@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Graphics.Shape
+module Graphics.Types.Shape
     ( Shape(..)
     , SomeShape(..)
 
@@ -16,9 +16,9 @@ module Graphics.Shape
 import Control.Exception.Base (assert)
 
 import Data.Colour (Colour)
-import Data.Material (Material, simpleMaterial)
 import Data.Vec (Vec, Normalized, dot, normalize, scale, cross)
 import Data.Ray (Ray(..), applyRay)
+import Graphics.Types.Material (Material, simpleMaterial)
 import Graphics.Internal ((~/=))
 
 

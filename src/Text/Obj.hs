@@ -10,7 +10,7 @@ import qualified Data.ByteString.Char8 as B
 import qualified Data.Array as A
 import Data.ByteString.Lex.Double (readDouble)
 
-import Graphics.Shape (Texture(..), SomeShape(..), triangle)
+import Graphics.Types.Shape (Texture(..), SomeShape(..), triangle)
 import Data.Colour (red)
 import Data.Vec (vec)
 

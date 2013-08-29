@@ -1,4 +1,4 @@
-module Data.Material
+module Graphics.Types.Material
     ( Material (..)
     , simpleMaterial
     ) where

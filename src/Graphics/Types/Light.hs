@@ -1,7 +1,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Graphics.Light
+module Graphics.Types.Light
     ( LightSource(..)
     , PointSource(..)
     , SomeLight(..)

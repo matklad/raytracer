@@ -1,11 +1,11 @@
-module Graphics.Scene
+module Graphics.Types.Scene
     ( Scene(..)
     ) where
 
 import Data.Colour (Colour)
-import Graphics.Camera (Camera)
-import Graphics.Shape (SomeShape)
-import Graphics.Light(SomeLight)
+import Graphics.Types.Camera (Camera)
+import Graphics.Types.Shape (SomeShape)
+import Graphics.Types.Light(SomeLight)
 
 data Scene = Scene
     { sceneCamera :: !Camera

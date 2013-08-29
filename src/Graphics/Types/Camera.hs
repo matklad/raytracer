@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Graphics.Camera
+module Graphics.Types.Camera
     ( Size
     , Resolution
     , Orientation
