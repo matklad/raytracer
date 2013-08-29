@@ -8,14 +8,14 @@ import qualified Graphics.UI.GLUT as GLUT
 import qualified Graphics.Rendering.OpenGL as GL
 import qualified Data.ByteString.Char8 as B
 
-import Text.Obj (parse)
 import Data.Colour (black, white, toGL)
 import Data.Vec (Vec, vec, scale)
-import Graphics.Types.Camera (Camera, mkCamera)
-import Graphics.Types.Scene (Scene(..))
-import Graphics.Types.Shape (SomeShape(..))
-import Graphics.Types.Light (PointSource(..), SomeLight(..))
-import Graphics.Tracer (renderAll)
+import Graphics.Ray.Tracer (renderAll)
+import Graphics.Ray.Types (Camera, mkCamera,
+                           Scene(..),
+                           SomeShape(..),
+                           PointSource(..), SomeLight(..))
+import Text.Obj (parse)
 
 resolution :: (Int, Int)
 resolution = (640, 480)
