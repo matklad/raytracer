@@ -4,6 +4,7 @@ import Data.List (foldl')
 import Control.Applicative ((<$>))
 
 import qualified Data.ByteString.Char8 as B
+import Control.DeepSeq(deepseq)
 
 import Data.Colour (black, white)
 import Data.Vec (Vec, vec, scale, cev)
@@ -42,5 +43,5 @@ main :: IO ()
 main = do
     scene <- mkScene . parse <$> B.getContents
     let colours = map snd $ renderAll scene
-        (r, g, b) = cev $ foldl' (+) black colours
-    print (r, g, b)
+        x = colours `deepseq` ()
+    print x

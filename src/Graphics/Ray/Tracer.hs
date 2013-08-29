@@ -14,6 +14,8 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
+import Control.Parallel.Strategies(using, rdeepseq, parList)
+
 import Data.Colour (Colour)
 import Data.Ray (Ray(..), applyRay)
 import Data.Vec (Vec, scale, dot)
@@ -89,9 +91,9 @@ render scene@(Scene { .. }) p = trace scene ray where
 
 
 renderAll :: Scene -> [((Int, Int), Colour)]
-renderAll scene@(Scene { sceneCamera }) = do
-    x <- [0..w]
-    y <- [0..h]
-    return ((x, y), render scene (x, y))
+renderAll scene@(Scene { sceneCamera }) =
+    [ ((x, y), render scene (x, y))
+    | x <- [0..w]
+    , y <- [0..h]] `using` parList rdeepseq
   where
     !(w, h) = camScreenResolution sceneCamera
