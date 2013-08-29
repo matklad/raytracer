@@ -14,7 +14,7 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
-import Control.Parallel.Strategies(using, rdeepseq, parList)
+import Control.Parallel.Strategies (using, rdeepseq, parBuffer)
 
 import Data.Colour (Colour)
 import Data.Ray (Ray(..), applyRay)
@@ -92,8 +92,9 @@ render scene@(Scene { .. }) p = trace scene ray where
 
 renderAll :: Scene -> [((Int, Int), Colour)]
 renderAll scene@(Scene { sceneCamera }) =
+    -- Alternative way is to pick chunk size as 'w * h / numCapabilities'.
     [ ((x, y), render scene (x, y))
     | x <- [0..w]
-    , y <- [0..h]] `using` parList rdeepseq
+    , y <- [0..h]] `using` parBuffer 512 rdeepseq
   where
     !(w, h) = camScreenResolution sceneCamera
