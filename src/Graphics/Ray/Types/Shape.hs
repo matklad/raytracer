@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Graphics.Types.Shape
+module Graphics.Ray.Types.Shape
     ( Shape(..)
     , SomeShape(..)
 
@@ -18,8 +18,8 @@ import Control.Exception.Base (assert)
 import Data.Colour (Colour)
 import Data.Vec (Vec, Normalized, dot, normalize, scale, cross)
 import Data.Ray (Ray(..), applyRay)
-import Graphics.Types.Material (Material, simpleMaterial)
-import Graphics.Internal ((~/=))
+import Graphics.Ray.Types.Material (Material, simpleMaterial)
+import Graphics.Ray.Internal ((~/=))
 
 
 data Texture = Solid Colour

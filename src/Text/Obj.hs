@@ -10,7 +10,7 @@ import qualified Data.ByteString.Char8 as B
 import qualified Data.Array as A
 import Data.ByteString.Lex.Double (readDouble)
 
-import Graphics.Types.Shape (Texture(..), SomeShape(..), triangle)
+import Graphics.Ray.Types (Texture(..), SomeShape(..), triangle)
 import Data.Colour (red)
 import Data.Vec (vec)
 
@@ -39,4 +39,3 @@ parse s =
 
     readFace l = let [a, b, c] = map readFaceBlock (tokens l)
                  in SomeShape $ triangle (Solid red) a b c
-

@@ -25,22 +25,24 @@ library
   hs-source-dirs:    src
   default-language:  Haskell2010
   ghc-options:       -Wall -fno-warn-orphans -O2 -funbox-strict-fields
-  exposed-modules:   Data.Vec
+  Exposed-modules:   Data.Vec
                    , Data.Ray
                    , Data.Colour
 
-                   , Graphics.Types.Material
-                   , Graphics.Types.Camera
-                   , Graphics.Types.Scene
-                   , Graphics.Types.Shape
-                   , Graphics.Types.Light
-                   , Graphics.Tracer
+                   , Graphics.Ray.Types
+                   , Graphics.Ray.Tracer
                    , Text.Obj
                    , Text.Mtl
 
 
   other-modules:     Data.Vec.Internal
-                     Graphics.Internal
+                   , Graphics.Ray.Internal
+                   , Graphics.Ray.Types.Camera
+                   , Graphics.Ray.Types.Light
+                   , Graphics.Ray.Types.Material
+                   , Graphics.Ray.Types.Scene
+                   , Graphics.Ray.Types.Shape
+
 
   build-depends:     base              == 4.6.*
                    , bytestring-lexing == 0.4.*

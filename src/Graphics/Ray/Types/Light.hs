@@ -1,15 +1,15 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Graphics.Types.Light
+module Graphics.Ray.Types.Light
     ( LightSource(..)
     , PointSource(..)
     , SomeLight(..)
     , Light(..)
     ) where
 
-import Data.Colour(Colour, white)
-import Data.Vec(Vec, Normalized, dot, normalize, norm)
+import Data.Colour (Colour, white)
+import Data.Vec (Vec, Normalized, dot, normalize, norm)
 
 data Light = Light
   { lightDirection :: !Vec

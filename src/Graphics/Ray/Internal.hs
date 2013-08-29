@@ -1,4 +1,4 @@
-module Graphics.Internal
+module Graphics.Ray.Internal
     ( (~==)
     , (~/=)
     ) where

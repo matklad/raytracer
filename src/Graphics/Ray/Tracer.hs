@@ -1,8 +1,9 @@
-{-# LANGUAGE TupleSections #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 
-module Graphics.Tracer
+module Graphics.Ray.Tracer
     ( trace
     , render
     , renderAll
@@ -16,33 +17,30 @@ import Data.Maybe (mapMaybe)
 import Data.Colour (Colour)
 import Data.Ray (Ray(..), applyRay)
 import Data.Vec (Vec, scale, dot)
-import Graphics.Types.Material (Material(..))
-import Graphics.Types.Camera (applyCamera, camScreenResolution)
-import Graphics.Types.Scene (Scene(..))
-import Graphics.Types.Shape (Shape(..), SomeShape(..), colourAt)
-import Graphics.Types.Light (LightSource(..), Light(..))
+import Graphics.Ray.Types (applyCamera, camScreenResolution,
+                           LightSource(..), Light(..),
+                           Material(..),
+                           Scene(..),
+                           Shape(..), SomeShape(..), colourAt)
 
 
 findIntersection :: [SomeShape] -> Ray -> Maybe (SomeShape, Double)
-findIntersection shapes ray = case all_intersections of
-    [] -> Nothing
+findIntersection shapes ray = case mapMaybe go shapes of
+    []          -> Nothing
     candidates  -> Just $ minimumBy (compare `on` snd) candidates
   where
-    aux shape = (shape, ) <$> shape `intersect` ray
-    all_intersections = mapMaybe aux shapes
+    go shape = (shape, ) <$> shape `intersect` ray
 {-# INLINE findIntersection #-}
 
 trace :: Scene -> Ray -> Colour
 trace scene@(Scene { .. }) ray = shade scene ray $ do
     (shape, d) <- findIntersection sceneShapes ray
     return (shape, applyRay ray d)
-
 {-# INLINEABLE trace #-}
 
 shade :: Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
-shade (Scene { .. }) _ Nothing = sceneColour
-shade (Scene { .. }) view (Just (shape, point)) =
-    ambient + diffuse + specular
+shade (Scene { .. }) _view Nothing              = sceneColour
+shade (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
   where
     baseColour = colourAt shape point
     n = normalAt shape point
@@ -91,8 +89,9 @@ render scene@(Scene { .. }) p = trace scene ray where
 
 
 renderAll :: Scene -> [((Int, Int), Colour)]
-renderAll scene =
-    let camera = sceneCamera scene
-        (w, h) = camScreenResolution camera
-    in
-     [((x, y), render scene (x, y))| x <- [0..w], y <- [0..h]]
+renderAll scene@(Scene { sceneCamera }) = do
+    x <- [0..w]
+    y <- [0..h]
+    return ((x, y), render scene (x, y))
+  where
+    !(w, h) = camScreenResolution sceneCamera

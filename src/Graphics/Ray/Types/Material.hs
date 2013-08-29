@@ -1,4 +1,4 @@
-module Graphics.Types.Material
+module Graphics.Ray.Types.Material
     ( Material (..)
     , simpleMaterial
     ) where
