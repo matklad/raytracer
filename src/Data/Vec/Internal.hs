@@ -19,6 +19,8 @@ import Prelude hiding (sum, zipWith)
 import Data.Foldable (Foldable(..), sum)
 import Data.Monoid (Monoid(..), Sum, Product)
 
+import Control.DeepSeq (NFData(..))
+
 -- | A vector in R^3.
 data Vec a = Vec { vecX :: !a
                  , vecY :: !a
@@ -57,6 +59,9 @@ instance Fractional a => Fractional (Vec a) where
   recip = fmap recip
   fromRational = singleton . fromRational
   {-# SPECIALIZE instance Fractional (Vec Double) #-}
+
+instance NFData a => NFData (Vec a) where
+    rnf (Vec a b c) = rnf a `seq` rnf b `seq` rnf c
 
 -- | Creates a vector with same value for all components.
 singleton :: a -> Vec a
