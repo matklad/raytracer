@@ -19,6 +19,7 @@ executable ray
                    , OpenGL      == 2.8.*
                    , GLUT        == 2.4.*
                    , bytestring  == 0.10.*
+                   , time        == 1.4.*
                    , tracer
 
 executable bench

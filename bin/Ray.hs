@@ -2,6 +2,7 @@ module Main (main) where
 
 import Control.Applicative ((<$>))
 import Control.Monad (forM_)
+import Data.Time.Clock (getCurrentTime, diffUTCTime)
 
 import Graphics.Rendering.OpenGL (($=))
 import qualified Graphics.UI.GLUT as GLUT
@@ -43,10 +44,14 @@ mkScene objs =
 
 display :: Scene -> IO ()
 display scene = do
+    start <- getCurrentTime
     GL.clearColor $= GL.Color4 0 0 0 0
     GL.clear [GL.ColorBuffer]
     GL.renderPrimitive GL.Points $ forM_ (renderAll scene) drawPixel
     GLUT.flush
+    GLUT.swapBuffers
+    finish <- getCurrentTime
+    print $ (show $ diffUTCTime finish start) ++ " for frame"
   where
     drawPixel ((x, y), color) = do
         GL.color $ toGL color
@@ -79,5 +84,6 @@ main :: IO ()
 main = do
     scene <- mkScene . parse <$> B.getContents
     (_, _) <- GLUT.getArgsAndInitialize
+    GLUT.initialDisplayMode $= [GLUT.DoubleBuffered]
     createWindowGL scene "Ray Tracer"
     GLUT.mainLoop
