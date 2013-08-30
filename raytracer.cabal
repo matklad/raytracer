@@ -13,7 +13,7 @@ cabal-version:       >= 1.12
 executable ray
   hs-source-dirs:    bin
   default-language:  Haskell2010
-  ghc-options:       -Wall -fno-warn-orphans -O2
+  ghc-options:       -Wall -fno-warn-orphans -O2 -threaded
   main-is:           Ray.hs
   build-depends:     base        == 4.6.*
                    , OpenGL      == 2.8.*
