@@ -1,3 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
+
+
 module Main (main) where
 
 import Control.Applicative ((<$>))
@@ -9,7 +12,7 @@ import qualified Graphics.UI.GLUT as GLUT
 import qualified Graphics.Rendering.OpenGL as GL
 import qualified Data.ByteString.Char8 as B
 
-import Data.Colour (black, white, toGL)
+import Data.Colour (Colour, black, white, toGL)
 import Data.Vec (Vec, vec, scale)
 import Graphics.Ray.Tracer (renderAll)
 import Graphics.Ray.Types (Camera, mkCamera,
@@ -17,6 +20,7 @@ import Graphics.Ray.Types (Camera, mkCamera,
                            SomeShape(..),
                            PointSource(..), SomeLight(..))
 import Text.Obj (parse)
+
 
 resolution :: (Int, Int)
 resolution = (640, 480)
@@ -42,12 +46,12 @@ mkScene objs =
              , sceneLight  = scale 0.1 white
              }
 
-display :: Scene -> IO ()
-display scene = do
+display :: [((Int, Int), Colour)] -> IO ()
+display pixels = do
     start <- getCurrentTime
     GL.clearColor $= GL.Color4 0 0 0 0
     GL.clear [GL.ColorBuffer]
-    GL.renderPrimitive GL.Points $ forM_ (renderAll scene) drawPixel
+    GL.renderPrimitive GL.Points $ forM_ pixels drawPixel
     GLUT.flush
     GLUT.swapBuffers
     finish <- getCurrentTime
@@ -70,20 +74,21 @@ reshape _ = do
     GL.matrixMode $= GL.Modelview 0
     GL.loadIdentity
 
-createWindowGL :: Scene -> String -> IO ()
-createWindowGL scene name = do
+createWindowGL :: [((Int, Int), Colour)] -> String -> IO ()
+createWindowGL pixels name = do
     _ <- GLUT.createWindow name
-    initGL scene
+    initGL pixels
 
-initGL :: Scene -> IO ()
-initGL scene = do
-    GLUT.displayCallback $= display scene
+initGL :: [((Int, Int), Colour)] -> IO ()
+initGL pixels = do
+    GLUT.displayCallback $= display pixels
     GLUT.reshapeCallback $= Just reshape
 
 main :: IO ()
 main = do
     scene <- mkScene . parse <$> B.getContents
+    let !pixels = renderAll scene
     (_, _) <- GLUT.getArgsAndInitialize
     GLUT.initialDisplayMode $= [GLUT.DoubleBuffered]
-    createWindowGL scene "Ray Tracer"
+    createWindowGL pixels "Ray Tracer"
     GLUT.mainLoop
