@@ -12,6 +12,9 @@ module Data.Vec
     , Internal.normalize
     , Internal.dot
     , Internal.cross
+    , Internal.lowerBound
+    , Internal.upperBound
+    , Internal.unzero
     ) where
 
 import qualified Data.Vec.Internal as Internal

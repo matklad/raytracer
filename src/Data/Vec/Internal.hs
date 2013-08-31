@@ -12,9 +12,12 @@ module Data.Vec.Internal
     , normalize
     , dot
     , cross
+    , lowerBound
+    , upperBound
+    , unzero
     ) where
 
-import Prelude hiding (sum, zipWith)
+import Prelude hiding (sum, zipWith, foldl1)
 
 import Data.Foldable (Foldable(..), sum)
 import Data.Monoid (Monoid(..), Sum, Product)
@@ -101,6 +104,26 @@ cross u v = Vec { vecX = sX, vecY = sY, vecZ = sZ } where
   !sZ = vecX u * vecY v - vecY u * vecX v
 {-# INLINEABLE cross #-}
 {-# SPECIALIZE INLINE cross :: Vec Double -> Vec Double -> Vec Double #-}
+
+lowerBound :: Ord a => [Vec a] -> Vec a
+lowerBound = foldl1 (zipWith min)
+{-# INLINEABLE lowerBound #-}
+{-# SPECIALIZE INLINE lowerBound :: [Vec Double] -> Vec Double  #-}
+
+upperBound :: Ord a => [Vec a] -> Vec a
+upperBound = foldl1 (zipWith max)
+{-# INLINEABLE upperBound #-}
+{-# SPECIALIZE INLINE upperBound :: [Vec Double] -> Vec Double  #-}
+
+unzero :: (Fractional a, Ord a) => Vec a -> Vec a
+unzero = fmap aux
+  where
+    aux x = if abs x > 0.0000001
+            then x
+            else signum x * 0.0000001
+{-# INLINEABLE unzero #-}
+{-# SPECIALIZE INLINE unzero :: Vec Double -> Vec Double  #-}
+
 
 -- | Combines two vectors using a binary function.
 zipWith :: (a -> b -> c) -> Vec a -> Vec b -> Vec c

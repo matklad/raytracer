@@ -19,7 +19,8 @@ import Data.Colour (Colour)
 import Data.Vec (Vec, Normalized, dot, normalize, scale, cross)
 import Data.Ray (Ray(..), applyRay)
 import Graphics.Ray.Types.Material (Material, simpleMaterial)
-import Graphics.Ray.Internal ((~/=))
+import Graphics.Ray.Types.BoundingBox (BoundingBox, fromPoints)
+import Graphics.Ray.Internal ((~/=), lInf, hInf)
 
 
 data Texture = Solid Colour
@@ -40,13 +41,17 @@ class Shape a where
 
     material :: a -> Material
 
+    boundingBox :: a -> BoundingBox
+    boundingBox _ = fromPoints [lInf, hInf]
+
 data SomeShape = forall a. Shape a => SomeShape a
 
 instance Shape SomeShape where
-    intersect (SomeShape shape) = intersect shape
-    normalAt (SomeShape shape)  = normalAt shape
-    texture (SomeShape shape)   = texture shape
-    material (SomeShape shape)  = material shape
+    intersect (SomeShape shape)   = intersect shape
+    normalAt (SomeShape shape)    = normalAt shape
+    texture (SomeShape shape)     = texture shape
+    material (SomeShape shape)    = material shape
+    boundingBox (SomeShape shape) = boundingBox shape
 
 -- * Shapes
 
@@ -100,6 +105,7 @@ data Triangle = Triangle
     , triangleC :: !Vec
     , triangleTexture  :: Texture
       -- microoptimization: precomputed constants
+    , triangleBox  :: !BoundingBox
     , triangleAB   :: !Vec
     , triangleAC   :: !Vec
     , triangleN    :: !Vec
@@ -113,6 +119,7 @@ triangle :: Texture -> Vec -> Vec -> Vec -> Triangle
 triangle triangleTexture triangleA triangleB triangleC =
     Triangle { .. }
   where
+    triangleBox = fromPoints [triangleA, triangleB, triangleC]
     triangleAB = triangleB - triangleA
     triangleAC = triangleC - triangleA
     triangleN  = normalize $ triangleAB `cross` triangleAC
@@ -153,6 +160,8 @@ instance Shape Triangle where
     normalAt = const . triangleN
     texture  = triangleTexture
     material = const simpleMaterial
+
+    boundingBox = triangleBox
 
 
 data Plane = Plane

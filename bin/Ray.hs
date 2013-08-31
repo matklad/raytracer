@@ -37,8 +37,8 @@ camera = mkCamera (vec 0 0 100) origin up 80 (40, 30) resolution
 mkScene :: [SomeShape] -> Scene
 mkScene objs =
     let
-        light1 = PointSource (vec (100) (0) 100) white
-        light2 = PointSource (vec (-100) (0) 100)  white
+        light1 = PointSource (vec 100 0 100) white
+        light2 = PointSource (vec (-100) 0 100)  white
     in Scene { sceneCamera = camera
              , sceneShapes = objs
              , sceneLights = [SomeLight light1, SomeLight light2]
@@ -55,7 +55,7 @@ display pixels = do
     GLUT.flush
     GLUT.swapBuffers
     finish <- getCurrentTime
-    print $ (show $ diffUTCTime finish start) ++ " for frame"
+    print $ show (diffUTCTime finish start) ++ " for frame"
   where
     drawPixel ((x, y), color) = do
         GL.color $ toGL color

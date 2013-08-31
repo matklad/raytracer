@@ -53,6 +53,8 @@ library
                    , Graphics.Ray.Types.Material
                    , Graphics.Ray.Types.Scene
                    , Graphics.Ray.Types.Shape
+                   , Graphics.Ray.Types.BoundingBox
+                   , Graphics.Ray.Octree
 
   build-depends:     base              == 4.6.*
                    , bytestring-lexing == 0.4.*

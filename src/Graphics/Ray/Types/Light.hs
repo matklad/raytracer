@@ -41,7 +41,7 @@ instance LightSource PointSource where
     shed (PointSource { .. }) p n = Light { .. }
       where
         path = pointSourcePosition - p
-        lightDirection = normalize $ path
+        lightDirection = normalize path
         lightColour    = pointSourceColour
         lightPower     = max 0 $ lightDirection `dot` n
         lightDistance  = norm path

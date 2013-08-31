@@ -24,7 +24,7 @@ import Graphics.Ray.Types (applyCamera, camScreenResolution,
                            Material(..),
                            Scene(..),
                            Shape(..), SomeShape(..), colourAt)
-
+import Graphics.Ray.Octree (Octree, mkOctree, filterShapes)
 
 findIntersection :: [SomeShape] -> Ray -> Maybe (SomeShape, Double)
 findIntersection shapes ray = case mapMaybe go shapes of
@@ -34,10 +34,12 @@ findIntersection shapes ray = case mapMaybe go shapes of
     go shape = (shape, ) <$> shape `intersect` ray
 {-# INLINE findIntersection #-}
 
-trace :: Scene -> Ray -> Colour
-trace scene@(Scene { .. }) ray = shade scene ray $ do
-    (shape, d) <- findIntersection sceneShapes ray
-    return (shape, applyRay ray d)
+trace :: Octree -> Scene -> Ray -> Colour
+trace octree scene@(Scene { .. }) ray =
+    let shapes = filterShapes ray octree
+    in shade scene ray $ do
+        (shape, d) <- findIntersection shapes ray
+        return (shape, applyRay ray d)
 {-# INLINEABLE trace #-}
 
 shade :: Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
@@ -66,7 +68,7 @@ shade (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
     computeSpecular :: Light -> Colour
     computeSpecular (Light { .. }) =
         let rview = reflect viewDirection n
-            k = (max 0 $ rview `dot` lightDirection) ** materialPhong
+            k = max 0 (rview `dot` lightDirection) ** materialPhong
         in scale k (lightColour * materialSpecular)
 
     visibleLights = filter isVisible $ map (\l -> shed l point n) sceneLights
@@ -83,18 +85,19 @@ reflect v n = r
     d = v + nproj
     r = nproj + d
 
-render :: Scene -> (Int, Int) -> Colour
-render scene@(Scene { .. }) p = trace scene ray where
+render :: Octree -> Scene -> (Int, Int) -> Colour
+render octree scene@(Scene { .. }) p = trace octree scene ray where
   ray :: Ray
   ray = applyCamera sceneCamera p
 {-# INLINEABLE render #-}
 
 
 renderAll :: Scene -> [((Int, Int), Colour)]
-renderAll scene@(Scene { sceneCamera }) =
+renderAll scene@(Scene { sceneCamera, sceneShapes }) =
     -- Alternative way is to pick chunk size as 'w * h / numCapabilities'.
-    [ ((x, y), render scene (x, y))
+    [ ((x, y), render octree scene (x, y))
     | x <- [0..w]
     , y <- [0..h]] `using` parBuffer 512 rdeepseq
   where
     !(w, h) = camScreenResolution sceneCamera
+    !octree = mkOctree 4 sceneShapes
