@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Control.Applicative ((<$>))
+import Data.Time.Clock (getCurrentTime, diffUTCTime)
 
 import qualified Data.ByteString.Char8 as B
 import Control.DeepSeq(deepseq)
@@ -40,7 +41,10 @@ mkScene objs =
 
 main :: IO ()
 main = do
+    start <- getCurrentTime
     scene <- mkScene . parse <$> B.getContents
     let colours = map snd $ renderAll scene
         x = colours `deepseq` ()
     print x
+    finish <- getCurrentTime
+    putStrLn $ show (diffUTCTime finish start) ++ " seconds"
