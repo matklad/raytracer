@@ -32,7 +32,7 @@ up :: Vec
 up = vec 0 1 0
 
 camera :: Camera
-camera = mkCamera (vec 0 0 100) origin up 80 (40, 30) resolution
+camera = mkCamera (vec 50 50 80) origin up 80 (40, 30) resolution
 
 mkScene :: [SomeShape] -> Scene
 mkScene objs =
