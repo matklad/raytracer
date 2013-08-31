@@ -29,7 +29,7 @@ mkOctreeRec :: Int -> BoundingBox -> [SomeShape] -> Octree
 mkOctreeRec depth box@(lBox, hBox) shapes =
     if depth == 1
     then Octree box shapes []
-    else Octree box parentShapes children
+    else Octree box [] children
   where
     diag = scale 0.5 (hBox - lBox)
     x = diag * vec 1 0 0
@@ -44,18 +44,17 @@ mkOctreeRec depth box@(lBox, hBox) shapes =
             h = l + diag
         return (l, h)
 
-    partition :: ([[SomeShape]], [SomeShape]) -> [SomeShape]
-                 -> ([[SomeShape]], [SomeShape])
+    partition :: [[SomeShape]] -> [SomeShape]
+                 -> [[SomeShape]]
     partition acc [] = acc
-    partition (c, p) (s:ss) =
+    partition c (s:ss) =
         case elemIndices False (map (disjoint (boundingBox s)) childrenBoxes) of
             []  -> error "impossible happend!"
             xs  ->
                 let newC = foldl (\a i -> take i a ++ [s:(a !! i)] ++ drop (i+1) a) c xs
-                   in partition (newC, p) ss
-            -- _   -> partition (c, s:p) ss
+                   in partition newC ss
 
-    (childrenShapes, parentShapes) = partition (replicate 8 [], []) shapes
+    childrenShapes = partition (replicate 8 []) shapes
     children = [mkOctreeRec (depth - 1) b s
                | (b, s) <- zip childrenBoxes childrenShapes
                , not (null s)]
