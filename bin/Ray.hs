@@ -1,16 +1,17 @@
 {-# LANGUAGE BangPatterns #-}
 
-
 module Main (main) where
 
 import Control.Applicative ((<$>))
 import Control.Monad (forM_, void)
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
 
+import Data.Array (Array)
 import Graphics.Rendering.OpenGL (($=))
-import qualified Graphics.UI.GLUT as GLUT
-import qualified Graphics.Rendering.OpenGL as GL
+import qualified Data.Array as Array
 import qualified Data.ByteString.Char8 as B
+import qualified Graphics.Rendering.OpenGL as GL
+import qualified Graphics.UI.GLUT as GLUT
 
 import Data.Colour (Colour, black, white, toGL)
 import Data.Vec (Vec, vec, scale)
@@ -47,12 +48,12 @@ mkScene objs =
              , sceneLight  = scale 0.1 white
              }
 
-display :: [((Int, Int), Colour)] -> IO ()
+display :: Array (Int, Int) Colour -> IO ()
 display pixels = do
     start <- getCurrentTime
     GL.clearColor $= GL.Color4 0 0 0 0
     GL.clear [GL.ColorBuffer]
-    GL.renderPrimitive GL.Points $ forM_ pixels drawPixel
+    GL.renderPrimitive GL.Points $ forM_ (Array.assocs pixels) drawPixel
     GLUT.flush
     GLUT.swapBuffers
     finish <- getCurrentTime

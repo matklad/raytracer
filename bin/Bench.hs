@@ -43,8 +43,6 @@ main :: IO ()
 main = do
     start <- getCurrentTime
     scene <- mkScene . parse <$> B.getContents
-    let colours = map snd $ renderAll scene
-        x = colours `deepseq` ()
-    print x
+    let _ = renderAll scene `deepseq` ()
     finish <- getCurrentTime
     putStrLn $ show (diffUTCTime finish start) ++ " seconds"

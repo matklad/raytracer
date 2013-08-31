@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -14,7 +15,10 @@ module Data.Colour
     , white
     ) where
 
+import Foreign.C.Types (CDouble(..))
+
 import qualified Graphics.Rendering.OpenGL as GL
+
 import Data.Vec (Vec, vec, cev)
 
 -- | Colour in float RGB representation, each of the three components
@@ -44,8 +48,7 @@ black = rgb 0 0 0
 white :: Colour
 white = rgb 0.9 0.9 0.9
 
-toGL :: Colour -> GL.Color3 GL.GLfloat
-toGL c = let (r, g, b) = cev c
-             aux = fromRational . toRational
-         in
-          GL.Color3 (aux r) (aux g) (aux b)
+toGL :: Colour -> GL.Color3 GL.GLdouble
+toGL c = GL.Color3 (CDouble r) (CDouble g) (CDouble b) where
+  !(r, g, b) = cev c
+{-# INLINE toGL #-}

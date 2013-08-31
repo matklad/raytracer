@@ -14,6 +14,7 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
+import Data.Array (Array, array)
 import Control.Parallel.Strategies (using, rdeepseq, parBuffer)
 
 import Data.Colour (Colour)
@@ -92,12 +93,14 @@ render octree scene@(Scene { .. }) p = trace octree scene ray where
 {-# INLINEABLE render #-}
 
 
-renderAll :: Scene -> [((Int, Int), Colour)]
+renderAll :: Scene -> Array (Int, Int) Colour
 renderAll scene@(Scene { sceneCamera, sceneShapes }) =
-    -- Alternative way is to pick chunk size as 'w * h / numCapabilities'.
-    [ ((x, y), render octree scene (x, y))
-    | x <- [0..w]
-    , y <- [0..h]] `using` parBuffer 512 rdeepseq
+    array ((0, 0), (w, h)) pixels
   where
     !(w, h) = camScreenResolution sceneCamera
     !octree = mkOctree 4 sceneShapes
+    pixels  =
+        -- Alternative way is to pick chunk size as 'w * h / numCapabilities'.
+        [ ((x, y), render octree scene (x, y))
+        | x <- [0..w], y <- [0..h]
+        ] `using` parBuffer 512 rdeepseq
