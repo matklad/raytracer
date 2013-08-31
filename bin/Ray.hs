@@ -4,7 +4,7 @@
 module Main (main) where
 
 import Control.Applicative ((<$>))
-import Control.Monad (forM_)
+import Control.Monad (forM_, void)
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
 
 import Graphics.Rendering.OpenGL (($=))
@@ -21,6 +21,7 @@ import Graphics.Ray.Types (Camera, mkCamera,
                            PointSource(..), SomeLight(..))
 import Text.Obj (parse)
 
+import Debug.Trace
 
 resolution :: (Int, Int)
 resolution = (640, 480)
@@ -59,13 +60,12 @@ display pixels = do
   where
     drawPixel ((x, y), color) = do
         GL.color $ toGL color
-        GL.vertex $ GL.Vertex2 (aux x) (aux y)
-    aux :: Int -> GL.GLfloat
-    aux = fromRational . toRational
+        GL.vertex $ GL.Vertex2
+            (fromIntegral x :: GL.GLint) (fromIntegral y :: GL.GLint)
 
 
 reshape :: GL.Size -> IO ()
-reshape _ = do
+reshape _size = do
     GLUT.windowSize $= GL.Size 640 480
     GL.viewport $= (GL.Position 0 0, GL.Size 640 480)
     GL.matrixMode $= GL.Projection
@@ -74,21 +74,14 @@ reshape _ = do
     GL.matrixMode $= GL.Modelview 0
     GL.loadIdentity
 
-createWindowGL :: [((Int, Int), Colour)] -> String -> IO ()
-createWindowGL pixels name = do
-    _ <- GLUT.createWindow name
-    initGL pixels
-
-initGL :: [((Int, Int), Colour)] -> IO ()
-initGL pixels = do
-    GLUT.displayCallback $= display pixels
-    GLUT.reshapeCallback $= Just reshape
 
 main :: IO ()
 main = do
     scene <- mkScene . parse <$> B.getContents
-    let !pixels = renderAll scene
+    let !pixels = traceShow "pixels" $ renderAll scene
     (_, _) <- GLUT.getArgsAndInitialize
     GLUT.initialDisplayMode $= [GLUT.DoubleBuffered]
-    createWindowGL pixels "Ray Tracer"
+    void $ GLUT.createWindow "Ray"
+    GLUT.displayCallback $= display pixels
+    GLUT.reshapeCallback $= Just reshape
     GLUT.mainLoop
