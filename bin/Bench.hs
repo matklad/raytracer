@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Main (main) where
 
 import Control.Applicative ((<$>))
@@ -43,6 +45,6 @@ main :: IO ()
 main = do
     start <- getCurrentTime
     scene <- mkScene . parse <$> B.getContents
-    let _ = renderAll scene `deepseq` ()
+    let !_ = renderAll scene `deepseq` ()
     finish <- getCurrentTime
     putStrLn $ show (diffUTCTime finish start) ++ " seconds"
