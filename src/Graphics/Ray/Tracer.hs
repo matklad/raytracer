@@ -98,6 +98,6 @@ render pixel = do
 renderAll :: Tracer (Array (Int, Int) Colour)
 renderAll = do
     (Camera { camScreenResolution = (w, h) }) <- getCamera
-    listArray ((0, 0), (w, h)) <$>
+    listArray ((0, 0), (pred w, pred h)) <$>
         -- Note(superbobry): please make me parallel once again!
         mapM render ([(x, y) | x <- [0..pred w], y <- [0..pred h]])
