@@ -38,14 +38,14 @@ findIntersection shapes ray = case mapMaybe go shapes of
 trace :: Octree -> Scene -> Ray -> Colour
 trace octree scene@(Scene { .. }) ray =
     let shapes = filterShapes ray octree
-    in shade scene ray $ do
+    in shade octree scene ray $ do
         (shape, d) <- findIntersection shapes ray
         return (shape, applyRay ray d)
 {-# INLINEABLE trace #-}
 
-shade :: Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
-shade (Scene { .. }) _view Nothing              = sceneColour
-shade (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
+shade :: Octree -> Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
+shade octree (Scene { .. }) _view Nothing              = sceneColour
+shade octree (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
   where
     baseColour = colourAt shape point
     n = normalAt shape point
@@ -60,7 +60,7 @@ shade (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
       where
         microShift = scale 0.00001 lightDirection
         ray = Ray (point + microShift) lightDirection
-        intersection = findIntersection sceneShapes ray
+        intersection = findIntersection (filterShapes ray octree) ray
 
     computeDiffuse :: Light -> Colour
     computeDiffuse (Light { .. }) =
