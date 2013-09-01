@@ -14,18 +14,19 @@ import Data.Function (on)
 import Data.List (minimumBy)
 import Data.Maybe (mapMaybe)
 
-import Data.Array (Array, array)
+import Data.Array (Array, listArray)
 import Control.Parallel.Strategies (using, rdeepseq, parBuffer)
 
 import Data.Colour (Colour)
 import Data.Ray (Ray(..), applyRay)
 import Data.Vec (Vec, scale, dot)
-import Graphics.Ray.Types (applyCamera, camScreenResolution,
+import Graphics.Ray.Monad (Tracer, getOctree, getScene, getCamera)
+import Graphics.Ray.Types (Scene(..),
+                           Camera(..), applyCamera,
                            LightSource(..), Light(..),
                            Material(..),
-                           Scene(..),
                            Shape(..), SomeShape(..), colourAt)
-import Graphics.Ray.Octree (Octree, mkOctree, filterShapes)
+import Graphics.Ray.Octree (Octree, filterShapes)
 
 findIntersection :: [SomeShape] -> Ray -> Maybe (SomeShape, Double)
 findIntersection shapes ray = case mapMaybe go shapes of
@@ -86,22 +87,17 @@ reflect v n = r
     d = v + nproj
     r = nproj + d
 
-render :: Octree -> Scene -> (Int, Int) -> Colour
-render octree scene@(Scene { .. }) p = trace octree scene ray where
-  ray :: Ray
-  ray = applyCamera sceneCamera p
+render :: (Int, Int) -> Tracer Colour
+render pixel = do
+    octree <- getOctree
+    scene@(Scene { sceneCamera }) <- getScene
+    let ray = applyCamera sceneCamera pixel
+    return $! trace octree scene ray
 {-# INLINEABLE render #-}
 
-
-renderAll :: Scene -> Array (Int, Int) Colour
-renderAll scene@(Scene { sceneCamera, sceneShapes }) =
-    array ((0, 0), (mx, my)) pixels
-  where
-    !(w, h) = camScreenResolution sceneCamera
-    !(mx, my) = (w-1, h-1)
-    !octree = mkOctree 4 sceneShapes
-    pixels  =
-        -- Alternative way is to pick chunk size as 'w * h / numCapabilities'.
-        [ ((x, y), render octree scene (x, y))
-        | x <- [0..mx], y <- [0..my]
-        ] `using` parBuffer 512 rdeepseq
+renderAll :: Tracer (Array (Int, Int) Colour)
+renderAll = do
+    (Camera { camScreenResolution = (w, h) }) <- getCamera
+    listArray ((0, 0), (w, h)) <$>
+        -- Note(superbobry): please make me parallel once again!
+        mapM render ([(x, y) | x <- [0..pred w], y <- [0..pred h]])
