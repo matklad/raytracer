@@ -44,8 +44,8 @@ trace octree scene@(Scene { .. }) ray =
 {-# INLINEABLE trace #-}
 
 shade :: Octree -> Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
-shade octree (Scene { .. }) _view Nothing              = sceneColour
-shade octree (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
+shade _octree (Scene { .. }) _view Nothing              = sceneColour
+shade octree  (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
   where
     baseColour = colourAt shape point
     n = normalAt shape point
@@ -95,12 +95,13 @@ render octree scene@(Scene { .. }) p = trace octree scene ray where
 
 renderAll :: Scene -> Array (Int, Int) Colour
 renderAll scene@(Scene { sceneCamera, sceneShapes }) =
-    array ((0, 0), (w, h)) pixels
+    array ((0, 0), (mx, my)) pixels
   where
     !(w, h) = camScreenResolution sceneCamera
+    !(mx, my) = (w-1, h-1)
     !octree = mkOctree 4 sceneShapes
     pixels  =
         -- Alternative way is to pick chunk size as 'w * h / numCapabilities'.
         [ ((x, y), render octree scene (x, y))
-        | x <- [0..w], y <- [0..h]
+        | x <- [0..mx], y <- [0..my]
         ] `using` parBuffer 512 rdeepseq
