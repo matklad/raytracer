@@ -4,6 +4,7 @@
 module Main (main) where
 
 import Control.Applicative ((<$>))
+import Control.Concurrent (getNumCapabilities)
 import Control.Monad (forM_, void)
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
 
@@ -79,10 +80,11 @@ reshape _size = do
 
 main :: IO ()
 main = do
+    numCapabilities <- getNumCapabilities
     scene@(Scene { sceneShapes }) <- mkScene . parse <$> B.getContents
     let octree  = mkOctree 4 sceneShapes
         ctx     = Context octree scene
-        !pixels = renderAll `runTracer` ctx
+        !pixels = renderAll numCapabilities `runTracer` ctx
     (_, _) <- GLUT.getArgsAndInitialize
     GLUT.initialDisplayMode $= [GLUT.DoubleBuffered]
     void $ GLUT.createWindow "Ray"

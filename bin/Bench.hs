@@ -3,6 +3,7 @@
 module Main (main) where
 
 import Control.Applicative ((<$>))
+import Control.Concurrent (getNumCapabilities)
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
 
 import qualified Data.ByteString.Char8 as B
@@ -46,10 +47,11 @@ mkScene objs =
 main :: IO ()
 main = do
     start <- getCurrentTime
+    numCapabilities <- getNumCapabilities
     scene@(Scene { sceneShapes }) <- mkScene . parse <$> B.getContents
     let octree = mkOctree 4 sceneShapes
         ctx    = Context octree scene
-        pixels = renderAll `runTracer` ctx
+        pixels = renderAll numCapabilities `runTracer` ctx
     print $ pixels `deepseq` ()
     finish <- getCurrentTime
     putStrLn $ show (diffUTCTime finish start) ++ " seconds"

@@ -95,9 +95,10 @@ render pixel = do
     return $! trace octree scene ray
 {-# INLINEABLE render #-}
 
-renderAll :: Tracer (Array (Int, Int) Colour)
-renderAll = do
+renderAll :: Int -> Tracer (Array (Int, Int) Colour)
+renderAll numCapabilities = do
     (Camera { camScreenResolution = (w, h) }) <- getCamera
-    listArray ((0, 0), (pred w, pred h)) <$>
-        -- Note(superbobry): please make me parallel once again!
-        mapM render ([(x, y) | x <- [0..pred w], y <- [0..pred h]])
+    pixels <- mapM render [(x, y) | x <- [0..pred w], y <- [0..pred h]]
+    let chunkSize = w * h `div` numCapabilities
+    return . listArray ((0, 0), (pred w, pred h)) $
+        (pixels `using` parBuffer chunkSize rdeepseq)
