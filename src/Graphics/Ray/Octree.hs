@@ -10,10 +10,11 @@ module Graphics.Ray.Octree
 import Data.List (elemIndices)
 import Text.Printf (printf)
 
-import Graphics.Ray.Types (SomeShape, BoundingBox, boundingBox, commonBox
-                          , disjoint, intersects)
 import Data.Vec (scale, vec)
 import Data.Ray (Ray(..))
+import Graphics.Ray.Types (SomeShape, boundingBox)
+import Graphics.Ray.Types.BoundingBox (BoundingBox, commonBox,
+                                       disjointWith, intersects)
 
 data Octree = Octree
     { treeBox      :: !BoundingBox
@@ -22,8 +23,8 @@ data Octree = Octree
     }
 
 mkOctree :: Int -> [SomeShape] -> Octree
-mkOctree depth shapes =
-    mkOctreeRec depth (commonBox $ map boundingBox shapes) shapes
+mkOctree maxDepth shapes =
+    mkOctreeRec maxDepth (commonBox $ map boundingBox shapes) shapes
 
 mkOctreeRec :: Int -> BoundingBox -> [SomeShape] -> Octree
 mkOctreeRec depth box@(lBox, hBox) shapes =
@@ -44,20 +45,20 @@ mkOctreeRec depth box@(lBox, hBox) shapes =
             h = l + diag
         return (l, h)
 
-    partition :: [[SomeShape]] -> [SomeShape]
-                 -> [[SomeShape]]
+    partition :: [[SomeShape]] -> [SomeShape] -> [[SomeShape]]
     partition acc [] = acc
     partition c (s:ss) =
-        case elemIndices False (map (disjoint (boundingBox s)) childrenBoxes) of
+        case elemIndices False (map (disjointWith (boundingBox s)) childrenBoxes) of
             []  -> error "impossible happend!"
             xs  ->
                 let newC = foldl (\a i -> take i a ++ [s:(a !! i)] ++ drop (i+1) a) c xs
-                   in partition newC ss
+                in partition newC ss
 
     childrenShapes = partition (replicate 8 []) shapes
-    children = [mkOctreeRec (depth - 1) b s
+    children = [ mkOctreeRec (depth - 1) b s
                | (b, s) <- zip childrenBoxes childrenShapes
-               , not (null s)]
+               , not (null s)
+               ]
 
 
 filterShapes :: Ray -> Octree-> [SomeShape]

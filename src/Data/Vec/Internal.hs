@@ -17,9 +17,10 @@ module Data.Vec.Internal
     , unzero
     ) where
 
-import Prelude hiding (sum, zipWith, foldl1)
+import Prelude hiding (sum, zipWith)
 
 import Data.Foldable (Foldable(..), sum)
+import Data.List (foldl1')
 import Data.Monoid (Monoid(..), Sum, Product)
 
 import Control.DeepSeq (NFData(..))
@@ -106,12 +107,12 @@ cross u v = Vec { vecX = sX, vecY = sY, vecZ = sZ } where
 {-# SPECIALIZE INLINE cross :: Vec Double -> Vec Double -> Vec Double #-}
 
 lowerBound :: Ord a => [Vec a] -> Vec a
-lowerBound = foldl1 (zipWith min)
+lowerBound = foldl1' (zipWith min)
 {-# INLINEABLE lowerBound #-}
 {-# SPECIALIZE INLINE lowerBound :: [Vec Double] -> Vec Double  #-}
 
 upperBound :: Ord a => [Vec a] -> Vec a
-upperBound = foldl1 (zipWith max)
+upperBound = foldl1' (zipWith max)
 {-# INLINEABLE upperBound #-}
 {-# SPECIALIZE INLINE upperBound :: [Vec Double] -> Vec Double  #-}
 
