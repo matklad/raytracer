@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Graphics.Ray.Octree
@@ -7,8 +8,11 @@ module Graphics.Ray.Octree
     , stats
     ) where
 
-import Data.List (elemIndices)
+import Data.List (findIndices)
 import Text.Printf (printf)
+
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IntMap
 
 import Data.Vec (scale, vec)
 import Data.Ray (Ray(..))
@@ -30,14 +34,20 @@ mkOctreeRec :: Int -> BoundingBox -> [SomeShape] -> Octree
 mkOctreeRec depth box@(lBox, hBox) shapes =
     if depth == 1
     then Octree box shapes []
-    else Octree box [] children
+    else Octree box [] $
+         [ mkOctreeRec (depth - 1) b s
+         | (b, s) <- zip childrenBoxes childrenShapes
+         , not (null s)
+         ]
   where
     diag = scale 0.5 (hBox - lBox)
     x = diag * vec 1 0 0
     y = diag * vec 0 1 0
     z = diag * vec 0 0 1
     zro = vec 0 0 0
-    childrenBoxes = do
+
+    childrenShapes = partition (IntMap.fromAscList $ zip [0..7] (repeat [])) shapes
+    childrenBoxes  = do
         sx <- [zro, x]
         sy <- [zro, y]
         sz <- [zro, z]
@@ -45,21 +55,15 @@ mkOctreeRec depth box@(lBox, hBox) shapes =
             h = l + diag
         return (l, h)
 
-    partition :: [[SomeShape]] -> [SomeShape] -> [[SomeShape]]
-    partition acc [] = acc
-    partition c (s:ss) =
-        case elemIndices False (map (disjointWith (boundingBox s)) childrenBoxes) of
-            []  -> error "impossible happend!"
-            xs  ->
-                let newC = foldl (\a i -> take i a ++ [s:(a !! i)] ++ drop (i+1) a) c xs
-                in partition newC ss
-
-    childrenShapes = partition (replicate 8 []) shapes
-    children = [ mkOctreeRec (depth - 1) b s
-               | (b, s) <- zip childrenBoxes childrenShapes
-               , not (null s)
-               ]
-
+    partition :: IntMap [SomeShape] -> [SomeShape] -> [[SomeShape]]
+    partition !acc [] =
+        -- Note(superbobry): thanks to the initializer, we _always_ have
+        -- an 'IntMap' of size 8.
+        IntMap.elems acc
+    partition !acc (s:ss) =
+        case findIndices (not . (boundingBox s `disjointWith`)) childrenBoxes of
+            [] -> error "partition: the impossible happened!"
+            is -> partition (foldr (IntMap.adjust (s:)) acc is) ss
 
 filterShapes :: Ray -> Octree-> [SomeShape]
 filterShapes ray (Octree { .. }) =
