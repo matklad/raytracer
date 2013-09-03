@@ -8,7 +8,7 @@ module Graphics.Ray.Octree
     , stats
     ) where
 
-import Data.List (findIndices)
+import Data.List (findIndices, foldl')
 import Text.Printf (printf)
 
 import Data.IntMap (IntMap)
@@ -65,11 +65,12 @@ mkOctreeRec depth box@(lBox, hBox) shapes =
             [] -> error "partition: the impossible happened!"
             is -> partition (foldr (IntMap.adjust (s:)) acc is) ss
 
-filterShapes :: Ray -> Octree-> [SomeShape]
-filterShapes ray (Octree { .. }) =
-    if intersects ray treeBox
-    then treeShapes ++ concatMap (filterShapes ray) treeChildren
-    else []
+filterShapes :: Ray -> (a -> SomeShape -> a)-> a -> Octree -> a
+filterShapes ray f start (Octree { .. }) =
+    case (intersects ray treeBox, treeChildren) of
+        (False, _) -> start
+        (True, []) -> foldl' f start treeShapes
+        (True, _ ) -> foldl' (filterShapes ray f) start treeChildren
 
 stats :: Octree -> String
 stats (Octree { .. }) = printf fmt n_children n_shapes children_stats

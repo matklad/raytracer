@@ -28,19 +28,21 @@ import Graphics.Ray.Types (Scene(..),
                            Shape(..), SomeShape(..), colourAt)
 import Graphics.Ray.Octree (Octree, filterShapes)
 
-findIntersection :: [SomeShape] -> Ray -> Maybe (SomeShape, Double)
-findIntersection shapes ray = case mapMaybe go shapes of
-    []          -> Nothing
-    candidates  -> Just $ minimumBy (compare `on` snd) candidates
+findIntersection :: Octree -> Ray -> Maybe (SomeShape, Double)
+findIntersection octree ray = filterShapes ray f Nothing octree
   where
-    go shape = (shape, ) <$> shape `intersect` ray
+    f Nothing shape = aux shape
+    f (Just c) shape = case aux shape of
+        Nothing -> Just c
+        Just x  ->  Just $ minimumBy (compare `on` snd) [c, x]
+
+    aux shape = (shape, ) <$> shape `intersect` ray
 {-# INLINE findIntersection #-}
 
 trace :: Octree -> Scene -> Ray -> Colour
 trace octree scene@(Scene { .. }) ray =
-    let shapes = filterShapes ray octree
-    in shade octree scene ray $ do
-        (shape, d) <- findIntersection shapes ray
+    shade octree scene ray $ do
+        (shape, d) <- findIntersection octree ray
         return (shape, applyRay ray d)
 {-# INLINEABLE trace #-}
 
@@ -61,7 +63,7 @@ shade octree  (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + sp
       where
         microShift = scale 0.00001 lightDirection
         ray = Ray (point + microShift) lightDirection
-        intersection = findIntersection (filterShapes ray octree) ray
+        intersection = findIntersection octree ray
 
     computeDiffuse :: Light -> Colour
     computeDiffuse (Light { .. }) =
