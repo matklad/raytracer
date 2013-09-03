@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
@@ -17,16 +16,17 @@ import Data.Maybe (mapMaybe)
 import Data.Array (Array, listArray)
 import Control.Parallel.Strategies (using, rdeepseq, parBuffer)
 
+
 import Data.Colour (Colour)
 import Data.Ray (Ray(..), applyRay)
 import Data.Vec (Vec, scale, dot)
-import Graphics.Ray.Monad (Tracer, getOctree, getScene, getCamera)
+import Graphics.Ray.Monad (Context(..), Tracer, getOctree, getScene, runTracer)
 import Graphics.Ray.Types (Scene(..),
                            Camera(..), applyCamera,
                            LightSource(..), Light(..),
                            Material(..),
                            Shape(..), SomeShape(..), colourAt)
-import Graphics.Ray.Octree (Octree, filterShapes)
+import Graphics.Ray.Octree (Octree, filterShapes, mkOctree)
 
 findIntersection :: [SomeShape] -> Ray -> Maybe (SomeShape, Double)
 findIntersection shapes ray = case mapMaybe go shapes of
@@ -95,10 +95,15 @@ render pixel = do
     return $! trace octree scene ray
 {-# INLINEABLE render #-}
 
-renderAll :: Int -> Tracer (Array (Int, Int) Colour)
-renderAll numCapabilities = do
-    (Camera { camScreenResolution = (w, h) }) <- getCamera
-    pixels <- mapM render [(x, y) | x <- [0..pred w], y <- [0..pred h]]
-    let chunkSize = w * h `div` numCapabilities
-    return . listArray ((0, 0), (pred w, pred h)) $
-        (pixels `using` parBuffer chunkSize rdeepseq)
+renderAll :: Int -> Scene -> Array (Int, Int) Colour
+renderAll numCapabilities scene@(Scene { .. }) = ret
+  where
+    (w, h)    = camScreenResolution sceneCamera
+    (mx, my)  = (pred w, pred h)
+    chunkSize = w * h `div` numCapabilities
+    strat     = parBuffer chunkSize rdeepseq
+    octree    = mkOctree 4 sceneShapes
+    ctx       = Context octree scene
+    pixels    = [(x, y)| x <- [0..mx], y <- [0..my]]
+    colours   = [render p `runTracer` ctx | p <- pixels] `using` strat
+    ret      = listArray ((0, 0), (mx, my)) colours

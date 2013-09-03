@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
 module Main (main) where
@@ -11,8 +12,6 @@ import Control.DeepSeq(deepseq)
 
 import Data.Colour (black, white)
 import Data.Vec (Vec, vec, scale)
-import Graphics.Ray.Monad (Context(..), runTracer)
-import Graphics.Ray.Octree (mkOctree)
 import Graphics.Ray.Tracer (renderAll)
 import Graphics.Ray.Types (Camera, mkCamera,
                            Scene(..),
@@ -48,10 +47,7 @@ main :: IO ()
 main = do
     start <- getCurrentTime
     numCapabilities <- getNumCapabilities
-    scene@(Scene { sceneShapes }) <- mkScene . parse <$> B.getContents
-    let octree = mkOctree 4 sceneShapes
-        ctx    = Context octree scene
-        pixels = renderAll numCapabilities `runTracer` ctx
-    print $ pixels `deepseq` ()
+    scene <- mkScene . parse <$> B.getContents
+    let !_ = renderAll numCapabilities scene `deepseq` ()
     finish <- getCurrentTime
     putStrLn $ show (diffUTCTime finish start) ++ " seconds"

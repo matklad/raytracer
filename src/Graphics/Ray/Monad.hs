@@ -28,7 +28,7 @@ newtype Tracer a = Tracer { unTracer :: Reader Context a }
     deriving (Monad, Functor)
 
 instance MonadReader Context Tracer where
-    ask      = Tracer $ ask
+    ask      = Tracer ask
     local f  = Tracer . local f . unTracer
     reader f = Tracer $ reader f
 

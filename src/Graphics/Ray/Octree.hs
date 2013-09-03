@@ -41,7 +41,7 @@ mkOctreeRec :: Int -> BoundingBox -> [TaggedShape] -> Octree
 mkOctreeRec depth box@(lBox, hBox) shapes =
     if depth == 1
     then Octree box shapes []
-    else Octree box [] $
+    else Octree box []
          [ mkOctreeRec (depth - 1) b s
          | (b, s) <- zip childrenBoxes childrenShapes
          , not (null s)

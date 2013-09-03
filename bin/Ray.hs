@@ -17,8 +17,6 @@ import qualified Graphics.UI.GLUT as GLUT
 
 import Data.Colour (Colour, black, white, toGL)
 import Data.Vec (Vec, vec, scale)
-import Graphics.Ray.Monad (Context(..), runTracer)
-import Graphics.Ray.Octree (mkOctree)
 import Graphics.Ray.Tracer (renderAll)
 import Graphics.Ray.Types (Camera, mkCamera,
                            Scene(..),
@@ -81,10 +79,8 @@ reshape _size = do
 main :: IO ()
 main = do
     numCapabilities <- getNumCapabilities
-    scene@(Scene { sceneShapes }) <- mkScene . parse <$> B.getContents
-    let octree  = mkOctree 4 sceneShapes
-        ctx     = Context octree scene
-        !pixels = renderAll numCapabilities `runTracer` ctx
+    scene <- mkScene . parse <$> B.getContents
+    let !pixels = renderAll numCapabilities scene
     (_, _) <- GLUT.getArgsAndInitialize
     GLUT.initialDisplayMode $= [GLUT.DoubleBuffered]
     void $ GLUT.createWindow "Ray"
