@@ -8,7 +8,7 @@ module Graphics.Ray.Octree
     , stats
     ) where
 
-import Data.List (findIndices)
+import Data.List (findIndices, foldl')
 import Text.Printf (printf)
 
 import Data.IntMap (IntMap)
@@ -20,7 +20,6 @@ import Graphics.Ray.Types (SomeShape, boundingBox)
 import Graphics.Ray.Types.BoundingBox (BoundingBox, commonBox,
                                        disjointWith, intersects)
 
-import Debug.Trace(traceShow)
 type TaggedShape = (Int, SomeShape)
 
 getBox :: TaggedShape -> BoundingBox
@@ -74,17 +73,14 @@ mkOctreeRec depth box@(lBox, hBox) shapes =
             is -> partition (foldr (IntMap.adjust (s:)) acc is) ss
 
 filterShapes :: Ray -> Octree-> [SomeShape]
-filterShapes ray octree = uniqueShapes
-  where
-    tshapes = filterShapesRec ray octree
-    uniqueShapes = IntMap.elems $ IntMap.fromList tshapes
+filterShapes ray octree = IntMap.elems $ filterShapesRec ray IntMap.empty octree
 
-filterShapesRec :: Ray -> Octree -> [TaggedShape]
-filterShapesRec ray (Octree { .. }) =
+filterShapesRec ::  Ray -> IntMap SomeShape -> Octree -> IntMap SomeShape
+filterShapesRec ray !acc (Octree { .. }) =
     case (intersects ray treeBox, treeChildren) of
-        (False, _) -> []
-        (True, []) -> treeShapes
-        (True, _ ) -> concatMap (filterShapesRec ray) treeChildren
+        (False, _) -> acc
+        (True, []) -> foldl' (\m (i, s) -> IntMap.insert i s m) acc treeShapes
+        (True, _ ) -> foldl' (filterShapesRec ray) acc treeChildren
 
 boxForShapes :: [TaggedShape] -> BoundingBox
 boxForShapes = commonBox . map getBox
