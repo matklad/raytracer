@@ -6,5 +6,4 @@ cabal.sandbox.config
 *.hi
 *.chi
 *.chs.h
-*.prof
 .virthualenv
