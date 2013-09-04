@@ -8,6 +8,7 @@ module Graphics.Ray.Tracer
     , renderAll
     ) where
 
+import Control.Monad (filterM)
 import Control.Applicative ((<$>))
 import Data.Function (on)
 import Data.List (minimumBy)
@@ -24,10 +25,12 @@ import Graphics.Ray.Types (Scene(..),
                            LightSource(..), Light(..),
                            Material(..),
                            Shape(..), SomeShape(..), colourAt)
-import Graphics.Ray.Octree (Octree, foldForRay, mkOctree)
+import Graphics.Ray.Octree (foldForRay, mkOctree)
 
-findIntersection :: Octree -> Ray -> Maybe (SomeShape, Double)
-findIntersection octree ray = foldForRay ray f Nothing octree
+findIntersection :: Ray -> Tracer (Maybe (SomeShape, Double))
+findIntersection ray = do
+    octree <- getOctree
+    return $ foldForRay ray f Nothing octree
   where
     f Nothing shape = aux shape
     f (Just c) shape = case aux shape of
@@ -36,30 +39,39 @@ findIntersection octree ray = foldForRay ray f Nothing octree
     aux shape = (shape, ) <$> shape `intersect` ray
 {-# INLINE findIntersection #-}
 
-trace :: Octree -> Scene -> Ray -> Colour
-trace octree scene@(Scene { .. }) ray = shade octree scene ray $ do
-    (shape, d) <- findIntersection octree ray
-    return (shape, applyRay ray d)
+trace ::  Ray -> Tracer Colour
+trace ray = do
+    intersection <- findIntersection ray
+    let shapePoint = do
+            (shape, d) <- intersection
+            return (shape, applyRay ray d)
+    shade ray shapePoint
 {-# INLINEABLE trace #-}
 
-shade :: Octree -> Scene -> Ray -> Maybe (SomeShape, Vec) -> Colour
-shade _octree (Scene { .. }) _view Nothing              = sceneColour
-shade octree  (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + specular
+shade :: Ray -> Maybe (SomeShape, Vec) -> Tracer Colour
+shade _view Nothing              = sceneColour <$> getScene
+shade view (Just (shape, point)) = do
+    lights <- sceneLights <$> getScene
+    ambientLight <- sceneLight <$> getScene
+    visibleLights <- filterM isVisible $ map (\l -> shed l point n) lights
+    let ambient    = baseColour * materialAmbient * ambientLight
+        diffuse    = sum $ map computeDiffuse visibleLights
+        specular   = sum $ map computeSpecular visibleLights
+    return $ ambient + diffuse + specular
   where
     baseColour = colourAt shape point
     n = normalAt shape point
     (Material { .. }) = material shape
     viewDirection = rayDirection view
 
-    isVisible :: Light -> Bool
-    isVisible (Light { .. }) =
-        case intersection of
+    isVisible :: Light -> Tracer Bool
+    isVisible (Light { .. }) = do
+        let microShift = scale 0.00001 lightDirection
+            ray = Ray (point + microShift) lightDirection
+        intersection <- findIntersection ray
+        return $ case intersection of
             Nothing -> True
             Just (_, d) -> d > lightDistance
-      where
-        microShift = scale 0.00001 lightDirection
-        ray = Ray (point + microShift) lightDirection
-        intersection = findIntersection octree ray
 
     computeDiffuse :: Light -> Colour
     computeDiffuse (Light { .. }) =
@@ -70,12 +82,6 @@ shade octree  (Scene { .. }) view (Just (shape, point)) = ambient + diffuse + sp
         let rview = reflect viewDirection n
             k = max 0 (rview `dot` lightDirection) ** materialPhong
         in scale k (lightColour * materialSpecular)
-
-    visibleLights = filter isVisible $ map (\l -> shed l point n) sceneLights
-
-    ambient    = baseColour * materialAmbient * sceneLight
-    diffuse    = sum $ map computeDiffuse visibleLights
-    specular   = sum $ map computeSpecular visibleLights
 {-# INLINABLE shade #-}
 
 reflect :: Vec -> Vec -> Vec
@@ -87,10 +93,9 @@ reflect v n = r
 
 render :: (Int, Int) -> Tracer Colour
 render pixel = do
-    octree <- getOctree
-    scene@(Scene { sceneCamera }) <- getScene
-    let ray = applyCamera sceneCamera pixel
-    return $! trace octree scene ray
+    camera <- sceneCamera <$> getScene
+    let ray = applyCamera camera pixel
+    trace ray
 {-# INLINEABLE render #-}
 
 renderAll :: Int -> Scene -> Array (Int, Int) Colour
