@@ -33,11 +33,13 @@ disjointWith (l1, h1) (l2, h2) = h1 `less` l2 || h2 `less` l1 where
 
 intersects :: Ray -> BoundingBox -> Bool
 intersects (Ray { .. }) (l, h) =
-    maximum [lx, ly, lz] < minimum [hx, hy, hz]
+    lt <= ht
   where
     d = unzero rayDirection
     ll = (l - rayOrigin) / d -- I think I do smth wrong with maths =(
     hh = (h - rayOrigin) / d
     (lx, ly, lz) = cev $ lowerBound [ll, hh]
     (hx, hy, hz) = cev $ upperBound [ll, hh]
+    lt = maximum [lx, ly, lz, 0]
+    ht = minimum [hx, hy, hz]
 {-# INLINE intersects #-}
