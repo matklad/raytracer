@@ -31,9 +31,9 @@ disjointWith (l1, h1) (l2, h2) = h1 `less` l2 || h2 `less` l1 where
              in x > 0 || y > 0 || z > 0
 {-# INLINE disjointWith #-}
 
-intersects :: Ray -> BoundingBox -> Bool
+intersects :: Ray -> BoundingBox -> Maybe Double
 intersects (Ray { .. }) (l, h) =
-    lt <= ht
+    if lt <= ht then Just lt else Nothing
   where
     d = unzero rayDirection
     ll = (l - rayOrigin) / d -- I think I do smth wrong with maths =(

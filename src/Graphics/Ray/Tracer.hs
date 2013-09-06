@@ -10,8 +10,6 @@ module Graphics.Ray.Tracer
 
 import Control.Monad (filterM)
 import Control.Applicative ((<$>))
-import Data.Function (on)
-import Data.List (minimumBy)
 
 import Data.Array (Array, listArray)
 import Control.Parallel.Strategies (using, rdeepseq, parBuffer)
@@ -25,18 +23,12 @@ import Graphics.Ray.Types (Scene(..),
                            LightSource(..), Light(..),
                            Material(..),
                            Shape(..), SomeShape(..), colourAt)
-import Graphics.Ray.Octree (foldForRay, mkOctree)
+import Graphics.Ray.Octree (doIntersect, mkOctree)
 
 findIntersection :: Ray -> Tracer (Maybe (SomeShape, Double))
 findIntersection ray = do
     octree <- getOctree
-    return $ foldForRay ray f Nothing octree
-  where
-    f Nothing shape = aux shape
-    f (Just c) shape = case aux shape of
-        Nothing -> Just c
-        Just x  ->  Just $ minimumBy (compare `on` snd) [c, x]
-    aux shape = (shape, ) <$> shape `intersect` ray
+    return $ doIntersect ray octree
 {-# INLINE findIntersection #-}
 
 trace ::  Ray -> Tracer Colour
