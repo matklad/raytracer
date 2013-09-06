@@ -111,7 +111,7 @@ doIntersect ray octree = runST $ do
                 Nothing -> return ()
                 (Just d) ->  if d < current
                              then do
-                                  writeSTRef cDist current
+                                  writeSTRef cDist d
                                   writeSTRef cShape (Just shape)
                              else return ()
     intersectM octree
