@@ -20,10 +20,10 @@ import Graphics.Ray.Types (SomeShape, boundingBox)
 import Graphics.Ray.Types.BoundingBox (BoundingBox, commonBox,
                                        disjointWith, intersects)
 
+data TreeNode = Leaf ![SomeShape] | Branch ![Octree]
 data Octree = Octree
     { treeBox      :: !BoundingBox
-    , treeShapes   :: ![SomeShape]
-    , treeChildren :: ![Octree]
+    , treeNode     :: !TreeNode
     }
 
 mkOctree :: Int -> [SomeShape] -> Octree
@@ -32,13 +32,13 @@ mkOctree maxDepth shapes =
 
 mkOctreeRec :: Int -> BoundingBox -> [SomeShape] -> Octree
 mkOctreeRec depth box@(lBox, hBox) shapes =
-    if depth == 1
-    then Octree box shapes []
-    else Octree box []
-         [ mkOctreeRec (depth - 1) b s
-         | (b, s) <- zip childrenBoxes childrenShapes
-         , not (null s)
-         ]
+    Octree box $ if depth == 1
+                 then Leaf shapes
+                 else Branch
+                      [ mkOctreeRec (depth - 1) b s
+                      | (b, s) <- zip childrenBoxes childrenShapes
+                      , not (null s)
+                      ]
   where
     diag = scale 0.5 (hBox - lBox)
     x = diag * vec 1 0 0
@@ -67,16 +67,15 @@ mkOctreeRec depth box@(lBox, hBox) shapes =
 
 foldForRay :: Ray -> (a -> SomeShape -> a) -> a -> Octree-> a
 foldForRay ray f start (Octree { .. }) =
-    case (intersects ray treeBox, treeChildren) of
+    case (intersects ray treeBox, treeNode) of
         (False, _) -> start
-        (True, []) -> foldl' f start treeShapes
-        (True, _ ) -> foldl' (foldForRay ray f) start treeChildren
+        (True, Leaf shapes) -> foldl' f start shapes
+        (True, Branch children ) -> foldl' (foldForRay ray f) start children
 
 
 stats :: Octree -> String
-stats (Octree { .. }) = printf fmt n_children n_shapes children_stats
+stats (Octree _ (Leaf shapes)) = printf "%d shapes" (length shapes)
+stats (Octree _ (Branch children)) =
+    printf "%d children\n%s" (length children) children_stats
   where
-    fmt = "%d children, %d shapes\n%s"
-    n_children = length treeChildren
-    n_shapes = length treeShapes
-    children_stats = unlines $ map (" " ++) (lines $ concatMap stats treeChildren)
+    children_stats = unlines $ map (" " ++) (lines $ concatMap stats children)
