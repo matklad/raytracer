@@ -106,13 +106,9 @@ data Triangle = Triangle
     , triangleTexture  :: Texture
       -- microoptimization: precomputed constants
     , triangleBox  :: !BoundingBox
-    , triangleAB   :: !Vec
-    , triangleAC   :: !Vec
     , triangleN    :: !Vec
-    , triangleABxN :: !Vec
-    , triangleACxN :: !Vec
-    , triangleABdACxN :: !Double
-    , triangleACdABxN :: !Double
+    , triangleABxNnorm :: !Vec
+    , triangleACxNnorm :: !Vec
     }
 
 triangle :: Texture -> Vec -> Vec -> Vec -> Triangle
@@ -127,6 +123,8 @@ triangle triangleTexture triangleA triangleB triangleC =
     triangleACxN = triangleAC `cross` triangleN
     triangleABdACxN = triangleAB `dot` triangleACxN
     triangleACdABxN = triangleAC `dot` triangleABxN
+    triangleABxNnorm = scale (1.0 / triangleACdABxN) triangleABxN
+    triangleACxNnorm = scale (1.0 / triangleABdACxN) triangleACxN
 
 instance Shape Triangle where
     intersect (Triangle { .. }) (Ray { .. }) =
@@ -154,8 +152,8 @@ instance Shape Triangle where
         denom = rayDirection `dot` triangleN
         t = (ao `dot` triangleN) / denom
         tdo = scale t rayDirection - ao
-        p = (tdo `dot` triangleACxN) / triangleABdACxN
-        q = (tdo `dot` triangleABxN) / triangleACdABxN
+        p = tdo `dot` triangleACxNnorm
+        q = tdo `dot` triangleABxNnorm
 
     normalAt = const . triangleN
     texture  = triangleTexture
