@@ -109,4 +109,4 @@ renderAll numCapabilities scene@(Scene { .. }) = ret
     ctx       = Context octree scene
     pixels    = [(x, y)| x <- [0..mx], y <- [0..my]]
     colours   = [render p `runTracer` ctx | p <- pixels] `using` strat
-    ret      = listArray ((0, 0), (mx, my)) colours
+    ret       = listArray ((0, 0), (mx, my)) colours

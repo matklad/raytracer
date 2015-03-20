@@ -7,7 +7,7 @@ module Data.Colour
     ( Colour
     , rgb
     , toGL
-
+    , toRGB8
     , red
     , green
     , blue
@@ -16,10 +16,9 @@ module Data.Colour
     ) where
 
 import Foreign.C.Types (CDouble(..))
-
 import qualified Graphics.Rendering.OpenGL as GL
-
 import Data.Vec (Vec, vec, cev)
+import Data.Word (Word8)
 
 -- | Colour in float RGB representation, each of the three components
 --   is a float from @[0, 1]@.
@@ -51,4 +50,10 @@ white = rgb 0.9 0.9 0.9
 toGL :: Colour -> GL.Color3 GL.GLdouble
 toGL c = GL.Color3 (CDouble r) (CDouble g) (CDouble b) where
   !(r, g, b) = cev c
+
+toRGB8 :: Colour -> (Word8, Word8, Word8)
+toRGB8 c = (to r, to g, to b)
+  where
+    (r, g, b) = cev c
+    to x = round $ max (min (x * 255) 255) 0
 {-# INLINE toGL #-}

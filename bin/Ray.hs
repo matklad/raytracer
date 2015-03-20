@@ -7,6 +7,7 @@ import Control.Applicative ((<$>))
 import Control.Concurrent (getNumCapabilities)
 import Control.Monad (forM_, void)
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
+import System.IO (stdout)
 
 import Data.Array (Array)
 import Graphics.Rendering.OpenGL (($=))
@@ -22,6 +23,7 @@ import Graphics.Ray.Types (Camera, mkCamera,
                            Scene(..),
                            SomeShape(..),
                            PointSource(..), SomeLight(..))
+import Graphics.Ray.Ppm (writePpm)
 import Text.Obj (parse)
 
 resolution :: (Int, Int)
@@ -81,9 +83,11 @@ main = do
     numCapabilities <- getNumCapabilities
     scene <- mkScene . parse <$> B.getContents
     let !pixels = renderAll numCapabilities scene
-    (_, _) <- GLUT.getArgsAndInitialize
-    GLUT.initialDisplayMode $= [GLUT.DoubleBuffered]
-    void $ GLUT.createWindow "Ray"
-    GLUT.displayCallback $= display pixels
-    GLUT.reshapeCallback $= Just reshape
-    GLUT.mainLoop
+    writePpm stdout pixels
+
+    -- (_, _) <- GLUT.getArgsAndInitialize
+    -- GLUT.initialDisplayMode $= [GLUT.DoubleBuffered]
+    -- void $ GLUT.createWindow "Ray"
+    -- GLUT.displayCallback $= display pixels
+    -- GLUT.reshapeCallback $= Just reshape
+    -- GLUT.mainLoop

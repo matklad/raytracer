@@ -15,12 +15,12 @@ executable ray
   default-language:  Haskell2010
   ghc-options:       -Wall -fno-warn-orphans -O2 -threaded
   main-is:           Ray.hs
-  build-depends:     base        == 4.6.*
-                   , OpenGL      == 2.8.*
-                   , GLUT        == 2.4.*
+  build-depends:     base        == 4.7.*
+                   , OpenGL      == 2.11.*
+                   , GLUT        == 2.6.*
                    , bytestring  == 0.10.*
                    , time        == 1.4.*
-                   , array       == 0.4.*
+                   , array       == 0.5.*
                    , tracer
 
 executable bench
@@ -28,9 +28,9 @@ executable bench
   default-language:  Haskell2010
   ghc-options:       -Wall -fno-warn-orphans -O2 -threaded
   main-is:           Bench.hs
-  build-depends:     base        == 4.6.*
-                   , OpenGL      == 2.8.*
-                   , GLUT        == 2.4.*
+  build-depends:     base        == 4.7.*
+                   , OpenGL      == 2.11.*
+                   , GLUT        == 2.6.*
                    , bytestring  == 0.10.*
                    , deepseq     == 1.3.*
                    , time        == 1.4.*
@@ -48,6 +48,7 @@ library
                    , Graphics.Ray.Octree
                    , Graphics.Ray.Types
                    , Graphics.Ray.Tracer
+                   , Graphics.Ray.Ppm
                    , Text.Obj
                    , Text.Mtl
 
@@ -60,14 +61,14 @@ library
                    , Graphics.Ray.Types.Shape
                    , Graphics.Ray.Types.BoundingBox
 
-  build-depends:     base              == 4.6.*
+  build-depends:     base              == 4.7.*
                    , bytestring-lexing == 0.4.*
                    , bytestring        == 0.10.*
-                   , array             == 0.4.*
+                   , binary            == 0.7.*
+                   , array             == 0.5.*
                    , attoparsec        == 0.10.4.*
-                   , OpenGL            == 2.8.*
+                   , OpenGL            == 2.11.*
                    , parallel          == 3.2.*
                    , deepseq           == 1.3.*
-                   , array             == 0.4.*
                    , mtl               == 2.1.*
                    , containers        == 0.5.*
